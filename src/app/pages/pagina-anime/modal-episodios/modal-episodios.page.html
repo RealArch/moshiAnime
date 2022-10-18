@@ -1,0 +1,33 @@
+<ion-header>
+  <ion-toolbar color="dark" position="top">
+    <ion-title>Episodios vistos</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismissOnly()">
+        <ion-icon slot="icon-only" name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content color="medium">
+  <ion-grid class="h-100">
+    <ion-row *ngIf="episodios>1">
+      <ion-col size="3" *ngFor="let in of counter(episodios) ;let i = index">
+        <ion-card [color]="episodioActual > i ? 'primary' : 'dark'" button class="m-0" color="primary" (click)="seleccionar(i+1)">
+          <ion-card-content class="text-center">
+            {{i+1}}
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+    <ion-row *ngIf="episodios==0 || episodios==null" class="h-100 ion-align-items-center">
+      <ion-col class="text-center">
+        <div>
+          Parece que no se ha definido la cantidad de episodios de este anime.
+        </div>
+
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  
+</ion-content>

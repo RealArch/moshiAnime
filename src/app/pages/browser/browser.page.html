@@ -1,0 +1,14 @@
+<ion-header>
+  <ion-toolbar color="dark">
+    <ion-title>Browser</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/"></ion-back-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content fullscreen color="medium">
+  <iframe  #iframe [src]="UrlFinal"
+  allowfullscreen height="100%" width="100%" frameborder="0" (load)="getOriginUrl()"></iframe>
+
+</ion-content>

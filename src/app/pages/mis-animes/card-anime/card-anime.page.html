@@ -1,0 +1,26 @@
+<ion-card class=" m-0" color="medium" *ngIf="!loading" button [routerLink]="['/pagina-anime',this.malId]">
+  <ion-row>
+    <ion-col size="auto">
+      <ion-card class="img m-0" [ngStyle]="{'background-image': 'url('+ anime.image_url +')'}">
+      </ion-card>
+    </ion-col>
+    <ion-col class="">
+      <ion-row class="h-100">
+        <ion-col size="12">
+          <p style="line-height: normal;">
+            <ion-text class="tituloAnime">
+              {{anime.title}}
+            </ion-text><br>
+          </p>
+        </ion-col>
+        <ion-col size="12" class="mt-auto contador text-right">
+          {{vistos}} / {{anime.episodes || '?'}}
+          <ion-progress-bar color="primary" [value]="vistos/anime.episodes"></ion-progress-bar>
+        </ion-col>
+      </ion-row>
+
+
+
+    </ion-col>
+  </ion-row>
+</ion-card>
