@@ -37,18 +37,23 @@ export class Tab1Page {
 
     this.api.getTopTv()
       .subscribe(data => {
-        this.topTv = data['top']
+        this.topTv = data['data']
         this.loadingUpcoming=false
+        console.log(data)
       })
     this.api.getTopUpcoming()
       .subscribe(data => {
-        this.topUpcoming = data['top']
+        this.topUpcoming = data['data']
         this.loadingTv=false
+        console.log(this.topUpcoming)
+
       })
     this.api.getTopAiring()
       .subscribe(data => {
-        this.topAiring = data['top']
+        this.topAiring = data['data']
         this.loadingAiring=false
+        console.log(this.topAiring)
+
 
       })
 

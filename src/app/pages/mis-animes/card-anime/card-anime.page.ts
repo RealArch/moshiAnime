@@ -18,15 +18,15 @@ export class CardAnimePage implements OnInit {
   ngOnInit() {
     this.loading=true
     this.api.getAnimeByMalId(this.malId)
-    .subscribe(data=>{
+    .subscribe((data:any)=>{
       console.log(data)
-      this.anime=data
+      this.anime=data.data
       this.loading=false
 
     },err=>{
       console.log(err)
       this.loading=false
-      console.log('tuve un probelma al cargar')
+      console.log('tuve un problema al cargar')
       this.ngOnInit()
       //toast error
     })

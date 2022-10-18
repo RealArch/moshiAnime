@@ -36,16 +36,16 @@ export class ApiService {
     return this.http.get(`${environment.api}getFirstList`)
   }
   getTopUpcoming() {
-    return this.http.get('https://api.jikan.moe/v3/top/anime/1/upcoming')
+    return this.http.get('https://api.jikan.moe/v4/top/anime?filter=upcoming')
   }
   getTopTv() {
-    return this.http.get('https://api.jikan.moe/v3/top/anime/1/tv')
+    return this.http.get('https://api.jikan.moe/v4/top/anime?type=tv')
   }
   getTopAiring() {
-    return this.http.get('https://api.jikan.moe/v3/top/anime/1/airing')
+    return this.http.get('https://api.jikan.moe/v4/top/anime?filter=airing')
   }
   getAnimeByMalId(id) {
-    return this.http.get(`https://api.jikan.moe/v3/anime/${id}`)
+    return this.http.get(`https://api.jikan.moe/v4/anime/${id}/full`)
   }
   //TIO ANIME
   getAnimeByIdTioAnime(id) {
@@ -75,12 +75,12 @@ export class ApiService {
   //JIKAN
   search(string) {
     //https://api.jikan.moe/v3/search/anime?q=kanojo
-    return this.http.get(`https://api.jikan.moe/v3/search/anime?q=${string}`)
+    return this.http.get(`https://api.jikan.moe/v4/search/anime?q=${string}`)
 
   }
   getStaffByMalId(id_anime) {
     //https://api.jikan.moe/v3/anime/1/characters_staff
-    return this.http.get(`https://api.jikan.moe/v3/anime/${id_anime}/characters_staff`)
+    return this.http.get(`https://api.jikan.moe/v4/anime/${id_anime}/characters`)
     //return this.http.post(`${environment.api}getStaffByMalId`,{id_anime:id_anime})
 
   }

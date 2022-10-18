@@ -31,8 +31,9 @@ export class MisAnimesPage implements OnInit {
         if (user != null) {
           this.uid = user.uid
           this.api.getUserInfo(this.uid)
-            .subscribe(data => {
+            .subscribe((data:any) => {
               this.user = data.payload.data()
+              console.log(this.user)
               this.listaAnime = this.user['listaAnime']
               this.cargarAnimes()
               this.loading = false

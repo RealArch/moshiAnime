@@ -19,7 +19,14 @@ export class PaginaAnimePage implements OnInit {
   anime
   loading: boolean;
   urlTioAnime: string;
-  servidores = [{
+  servidores = [
+    {
+      id: 0,
+      name: 'JK anime',
+      idiomas: ['Esp'],
+      link: "https://jkanime.net/"
+    },
+    {
     id: 0,
     name: 'Tio anime',
     idiomas: ['Esp'],
@@ -76,11 +83,15 @@ export class PaginaAnimePage implements OnInit {
             var malId = this.activatedRoute.snapshot.paramMap.get('id')
             this.api.getAnimeByMalId(malId)
               .subscribe(data => {
-                console.log(data)
-                this.anime = data
+                this.anime = data['data']
+                console.log(this.anime)
+
                 this.api.getStaffByMalId(this.anime.mal_id)
-                  .subscribe(data => {
-                    this.characters = data['characters']
+                  .subscribe((data:any) => {
+                    console.log(data)
+
+                    this.characters = data.data
+                    console.log(this.characters)
                     this.loading = false
                   })
               })
@@ -110,23 +121,32 @@ export class PaginaAnimePage implements OnInit {
   ver() {
     //TIO ANIME
     var busqueda = this.prepararTitulo(this.anime.title)
-    this.router.navigate(['/pagina-anime/', this.anime.mal_id, this.servidores[this.servidorActivo].link + busqueda])
+    var link = this.servidores[this.servidorActivo].link + busqueda
+    console.log(link)
+    // this.router.navigate(['/pagina-anime/', this.anime.mal_id, link])
 
     // [routerLink]="['/pagina-anime/',anime.mal_id,url]"
   }
   prepararTitulo(titulo) {
-    var excluidos = ['sama', 'chan', 'kun', 'tachi']
-    var nuevoTitulo
-    var nuevoTitulo = titulo.split('-')
-    for (let i = 0; i < nuevoTitulo.length; i++) {
-      console.log(nuevoTitulo)
-      let a = nuevoTitulo[i].split(' ')
-      if (excluidos.includes(a[0])) {
-        nuevoTitulo[i] = '-' + nuevoTitulo[i]
-      }
+    // var excluidos = ['sama', 'chan', 'kun', 'tachi']
+    // var nuevoTitulo
+    // var nuevoTitulo = titulo.split('-')
+    // for (let i = 0; i < nuevoTitulo.length; i++) {
+    //   console.log(nuevoTitulo)
+    //   // busqueda = busqueda.replace(' ','_')
+      
+    //   let a = nuevoTitulo[i].split(' ')
+    //   if (excluidos.includes(a[0])) {
+    //     nuevoTitulo[i] = '-' + nuevoTitulo[i]
+    //   }
 
-    }
-    return nuevoTitulo
+    // }
+    titulo = titulo.replace(' meido ', "maid")
+
+    titulo = titulo.replace(/_|#|:|@|<>/g, "")
+    titulo = titulo.replaceAll(' ','-').toLowerCase()
+    
+    return titulo
   }
 
   async presentActionSheet() {
