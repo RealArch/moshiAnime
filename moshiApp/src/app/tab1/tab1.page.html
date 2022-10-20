@@ -1,0 +1,126 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="dark">
+    <ion-title>
+      Top anime
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button routerLink="/search">
+        <ion-icon slot="icon-only" name="search"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content color="dark">
+  <ion-grid *ngIf="loadingTv || loadingUpcoming || loadingAiring" >
+    <ion-row class="loading">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+
+    </ion-row>
+  </ion-grid>
+  <ion-grid class="" *ngIf="!loadingTv || !loadingUpcoming || !loadingAiring">
+    <ion-card class="m-1 p-2 mb-2" color="medium">
+      <div class="pb-1">
+        <ion-text>
+          <strong>
+            Top tv
+          </strong>
+        </ion-text>
+      </div>
+
+
+      <ion-slides [options]="slideOpts" class="p-1">
+        <ion-slide *ngFor="let anime of topTv" [routerLink]="['/pagina-anime',anime.mal_id]">
+          <div class="p-0 m-0 w-100 no-shadow" color="translucent">
+            <div class="img ">
+              <img [src]="anime.images.jpg.image_url" style="height: 100%; object-fit: cover;">
+
+              <!-- <img [src]="anime.image_url" class="" style="min-height: 100%;" alt=""> -->
+            </div>
+            <div class="px-1 pt-1 pb-0">
+              <!-- <ion-card-subtitle>{{anime.type}}</ion-card-subtitle> -->
+              <div class="tituloAnime">{{anime.title}}</div>
+              <div class="text-left pt-1 d-flex align-items-center">
+                <ion-icon name="star"></ion-icon>
+                <ion-text class="pt-1 pl-1" style="font-size: 11px;"> {{anime.score}}</ion-text>
+              </div>
+              <!-- <div style="">
+              Rank: {{anime.rank}} <br>
+              Fecha de inicio: {{anime.start_date}}
+            </div> -->
+            </div>
+          </div>
+        </ion-slide>
+      </ion-slides>
+    </ion-card>
+
+    <ion-card class="m-1 p-2" color="medium">
+      <div class="pb-1">
+        <ion-text>
+          <strong>
+            Top upcoming
+          </strong>
+        </ion-text>
+      </div>
+
+      <ion-slides [options]="slideOpts" class="p-1">
+        <ion-slide *ngFor="let anime of topUpcoming" [routerLink]="['/pagina-anime',anime.mal_id]">
+          <div class="p-0 m-0 w-100 no-shadow" color="translucent">
+            <div class="img">
+              <img [src]="anime.images.jpg.image_url" style="height: 100%; object-fit: cover;">
+
+            </div>
+            <div class="px-1 pt-1 pb-0">
+              <!-- <ion-card-subtitle>{{anime.type}}</ion-card-subtitle> -->
+              <div class="tipoAnime">{{anime.type}}</div>
+              <div class="tituloAnime">{{anime.title}}</div>
+              <div class="text-left pt-1 d-flex align-items-center">
+                <ion-icon name="calendar-number"></ion-icon>
+                <ion-text class="pt-1 pl-1" style="font-size: 11px;"> {{anime.start_date || '?'}}</ion-text>
+              </div>
+              <!-- <div style="">
+        Rank: {{anime.rank}} <br>
+        Fecha de inicio: {{anime.start_date}}
+      </div> -->
+            </div>
+          </div>
+        </ion-slide>
+      </ion-slides>
+    </ion-card>
+    <!-- AIRING -->
+    <ion-card class="m-1 p-2" color="medium">
+      <div class="pb-1">
+        <ion-text>
+          <strong>
+            Top airing
+          </strong>
+        </ion-text>
+      </div>
+
+      <ion-slides [options]="slideOpts" class="p-1">
+        <ion-slide *ngFor="let anime of topAiring" [routerLink]="['/pagina-anime',anime.mal_id]">
+          <div class="p-0 m-0 w-100 no-shadow" color="translucent">
+            <div class="img">
+              <img [src]="anime.images.jpg.image_url" style="height: 100%; object-fit: cover;">
+
+            </div>
+            <div class="px-1 pt-1 pb-0">
+              <!-- <ion-card-subtitle>{{anime.type}}</ion-card-subtitle> -->
+              <div class="tipoAnime">{{anime.type}}</div>
+              <div class="tituloAnime">{{anime.title}}</div>
+              <div class="text-left pt-1 d-flex align-items-center">
+                <ion-icon name="star"></ion-icon>
+                <ion-text class="pt-1 pl-1" style="font-size: 11px;"> {{anime.score || '?'}}</ion-text>
+              </div>
+              <!-- <div style="">
+        Rank: {{anime.rank}} <br>
+        Fecha de inicio: {{anime.start_date}}
+      </div> -->
+            </div>
+          </div>
+        </ion-slide>
+      </ion-slides>
+    </ion-card>
+  </ion-grid>
+
+</ion-content>

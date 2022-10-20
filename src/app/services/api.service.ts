@@ -75,7 +75,7 @@ export class ApiService {
   //JIKAN
   search(string) {
     //https://api.jikan.moe/v3/search/anime?q=kanojo
-    return this.http.get(`https://api.jikan.moe/v4/search/anime?q=${string}`)
+    return this.http.get(`https://api.jikan.moe/v4/anime?q=${string}`)
 
   }
   getStaffByMalId(id_anime) {

@@ -1,0 +1,7 @@
+{
+  "name": "moshiApp",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

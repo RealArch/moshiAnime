@@ -1,0 +1,45 @@
+<ion-content color="dark">
+  <div class="imagenFondo w-100 h-100">
+    <ion-grid class="h-100" *ngIf="loading">
+      <ion-row class="loading">
+        <ion-spinner name="crescent" color="light"></ion-spinner>
+        iniciando Sesión
+      </ion-row>
+    </ion-grid>
+    <ion-grid class="h-100" *ngIf="!loading">
+      <ion-row class="h-100 ion-align-items-center  box1">
+        <ion-col size="12" class="h-50  d-flex ion-justify-content-center ion-align-items-center">
+          <div>
+            <!-- <div class="avatar m-auto">
+
+            </div> -->
+            <div class="text-center py-2 titulo">
+              Moshi Anime
+            </div>
+          </div>
+        </ion-col>
+        <ion-col size="12" class="h-50 d-flex ion-justify-content-center ion-align-items-center ">
+          <div>
+            <ion-button (click)="google()" color="primary">
+              <ion-icon name="logo-google" class="pr-2"></ion-icon>
+              Iniciar sesion con Google
+            </ion-button>
+          </div>
+
+
+         
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+    
+  </div>
+  <div class="gradiente d-flex align-items-end ion-justify-content-center">
+
+      <div class="px-3 pb-3  text-center">
+        De momento solo puedes iniciar sesión con google.
+      </div>
+
+  </div>
+
+
+</ion-content>

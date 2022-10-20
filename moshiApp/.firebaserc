@@ -1,0 +1,14 @@
+{
+  "targets": {
+    "moshianimeapp": {
+      "hosting": {
+        "app": [
+          "moshianimeapp"
+        ]
+      }
+    }
+  },
+  "projects": {
+    "default": "moshianimeapp"
+  }
+}

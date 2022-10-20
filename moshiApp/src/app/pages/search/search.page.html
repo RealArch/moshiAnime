@@ -1,0 +1,40 @@
+<ion-header>
+  <ion-toolbar color="dark">
+    <ion-searchbar #mainSearchbar showCancelButton="always" color="medium" (ionCancel)="close()" (ionChange)="search($event)"></ion-searchbar>
+    <ion-buttons slot="end">
+      <!-- <ion-button (click)="close()">
+        <ion-icon slot="icon-only" name="close"></ion-icon>
+      </ion-button> -->
+    </ion-buttons>
+  </ion-toolbar>  
+</ion-header>
+
+<ion-content color="dark">
+  <ion-grid *ngIf="loading" >
+    <ion-row class="loading">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+
+    </ion-row>
+  </ion-grid>
+  <ion-grid *ngIf="!loading">
+    <ion-row>
+      <ion-col size="4" *ngFor="let anime of animesFinal">
+        <ion-card color="medium" class="p-0 m-0 w-100" [routerLink]="['/pagina-anime/',anime.mal_id]" >
+          <div class="img"  [ngStyle]="{'background-image': 'url('+ anime.images.jpg.image_url +')'}"></div>          
+          <ion-card-content style="padding: 5px;">
+            <!-- <ion-card-subtitle>{{anime.type}}</ion-card-subtitle> -->
+            <div class="tipoAnime">{{anime.type}}</div>
+            <div class="tituloAnime">{{anime.title}}</div>
+            <div class="text-left pt-1 d-flex align-items-center">
+              <ion-icon name="star"></ion-icon><ion-text class="pt-1 pl-1" style="font-size: 11px;"> {{anime.score}}</ion-text> 
+            </div>
+            <!-- <div style="">
+              Rank: {{anime.rank}} <br>
+              Fecha de inicio: {{anime.start_date}}
+            </div> -->
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

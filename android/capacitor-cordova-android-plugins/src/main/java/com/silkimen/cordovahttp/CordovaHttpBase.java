@@ -35,13 +35,14 @@ abstract class CordovaHttpBase implements Runnable {
   protected String responseType;
   protected Object data;
   protected JSONObject headers;
-  protected int timeout;
+  protected int connectTimeout;
+  protected int readTimeout;
   protected boolean followRedirects;
   protected TLSConfiguration tlsConfiguration;
   protected CordovaObservableCallbackContext callbackContext;
 
-  public CordovaHttpBase(String method, String url, String serializer, Object data, JSONObject headers, int timeout,
-      boolean followRedirects, String responseType, TLSConfiguration tlsConfiguration,
+  public CordovaHttpBase(String method, String url, String serializer, Object data, JSONObject headers, int connectTimeout,
+      int readTimeout, boolean followRedirects, String responseType, TLSConfiguration tlsConfiguration,
       CordovaObservableCallbackContext callbackContext) {
 
     this.method = method;
@@ -49,20 +50,22 @@ abstract class CordovaHttpBase implements Runnable {
     this.serializer = serializer;
     this.data = data;
     this.headers = headers;
-    this.timeout = timeout;
+    this.connectTimeout = connectTimeout;
+    this.readTimeout = readTimeout;
     this.followRedirects = followRedirects;
     this.responseType = responseType;
     this.tlsConfiguration = tlsConfiguration;
     this.callbackContext = callbackContext;
   }
 
-  public CordovaHttpBase(String method, String url, JSONObject headers, int timeout, boolean followRedirects,
+  public CordovaHttpBase(String method, String url, JSONObject headers, int connectTimeout, int readTimeout, boolean followRedirects,
       String responseType, TLSConfiguration tlsConfiguration, CordovaObservableCallbackContext callbackContext) {
 
     this.method = method;
     this.url = url;
     this.headers = headers;
-    this.timeout = timeout;
+    this.connectTimeout = connectTimeout;
+    this.readTimeout = readTimeout;
     this.followRedirects = followRedirects;
     this.responseType = responseType;
     this.tlsConfiguration = tlsConfiguration;
@@ -72,8 +75,8 @@ abstract class CordovaHttpBase implements Runnable {
   @Override
   public void run() {
     CordovaHttpResponse response = new CordovaHttpResponse();
-
     HttpRequest request = null;
+
     try {
       request = this.createRequest();
       this.prepareRequest(request);
@@ -81,27 +84,27 @@ abstract class CordovaHttpBase implements Runnable {
       this.processResponse(request, response);
       request.disconnect();
     } catch (HttpRequestException e) {
-      if (e.getCause() instanceof SSLException) {
+      Throwable cause = e.getCause();
+      String message = cause.getMessage();
+
+      if (cause instanceof SSLException) {
         response.setStatus(-2);
         response.setErrorMessage("TLS connection could not be established: " + e.getMessage());
         Log.w(TAG, "TLS connection could not be established", e);
-      } else if (e.getCause() instanceof UnknownHostException) {
+      } else if (cause instanceof UnknownHostException) {
         response.setStatus(-3);
         response.setErrorMessage("Host could not be resolved: " + e.getMessage());
         Log.w(TAG, "Host could not be resolved", e);
-      } else if (e.getCause() instanceof SocketTimeoutException) {
+      } else if (cause instanceof SocketTimeoutException) {
         response.setStatus(-4);
         response.setErrorMessage("Request timed out: " + e.getMessage());
         Log.w(TAG, "Request timed out", e);
+      } else if (cause instanceof InterruptedIOException && "thread interrupted".equals(message.toLowerCase())) {
+        this.setAborted(request, response);
       } else {
-        String cause = e.getCause().getMessage();
-        if(e.getCause() instanceof InterruptedIOException && "thread interrupted".equals(cause.toLowerCase())){
-          this.setAborted(request, response);
-        } else {
-          response.setStatus(-1);
-          response.setErrorMessage("There was an error with the request: " + cause);
-          Log.w(TAG, "Generic request error", e);
-        }
+        response.setStatus(-1);
+        response.setErrorMessage("There was an error with the request: " + message);
+        Log.w(TAG, "Generic request error", e);
       }
     } catch (InterruptedException ie) {
       this.setAborted(request, response);
@@ -128,7 +131,8 @@ abstract class CordovaHttpBase implements Runnable {
 
   protected void prepareRequest(HttpRequest request) throws JSONException, IOException {
     request.followRedirects(this.followRedirects);
-    request.readTimeout(this.timeout);
+    request.connectTimeout(this.connectTimeout);
+    request.readTimeout(this.readTimeout);
     request.acceptCharset("UTF-8");
     request.uncompress(true);
 
@@ -154,7 +158,7 @@ abstract class CordovaHttpBase implements Runnable {
     } else if ("urlencoded".equals(this.serializer)) {
       // intentionally left blank, because content type is set in HttpRequest.form()
     } else if ("multipart".equals(this.serializer)) {
-      request.contentType("multipart/form-data");
+      // intentionally left blank, because content type is set in HttpRequest.part()
     }
   }
 
@@ -187,6 +191,12 @@ abstract class CordovaHttpBase implements Runnable {
           request.part(name, fileNames.getString(i), types.getString(i), new ByteArrayInputStream(bytes));
         }
       }
+
+      // prevent sending malformed empty multipart requests (#372)
+      if (buffers.length() == 0) {
+        request.contentType("multipart/form-data; boundary=00content0boundary00");
+        request.send("\r\n--00content0boundary00--\r\n");
+      }
     }
   }
 
@@ -213,13 +223,15 @@ abstract class CordovaHttpBase implements Runnable {
   protected void setAborted(HttpRequest request, CordovaHttpResponse response) {
     response.setStatus(-8);
     response.setErrorMessage("Request was aborted");
-    if(request != null){
-      try{
+
+    if (request != null) {
+      try {
         request.disconnect();
       } catch(Exception any){
         Log.w(TAG, "Failed to close aborted request", any);
       }
     }
+
     Log.i(TAG, "Request was aborted");
   }
 }

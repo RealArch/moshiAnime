@@ -5,6 +5,9 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -12,9 +15,15 @@ import javax.net.ssl.SSLSocketFactory;
 public class TLSSocketFactory extends SSLSocketFactory {
 
   private SSLSocketFactory delegate;
+  private List<String> blacklistedProtocols;
 
-  public TLSSocketFactory(SSLContext context) {
-    delegate = context.getSocketFactory();
+  public TLSSocketFactory(SSLContext context, String[] blacklistedProtocols) {
+    this.delegate = context.getSocketFactory();
+    this.blacklistedProtocols = new ArrayList();
+
+    for (int i = 0; i < blacklistedProtocols.length; ++i) {
+      this.blacklistedProtocols.add(blacklistedProtocols[i].trim());
+    }
   }
 
   @Override
@@ -55,9 +64,21 @@ public class TLSSocketFactory extends SSLSocketFactory {
   }
 
   private Socket enableTLSOnSocket(Socket socket) {
-    if (socket != null && (socket instanceof SSLSocket)) {
-      ((SSLSocket) socket).setEnabledProtocols(new String[] { "TLSv1", "TLSv1.1", "TLSv1.2" });
+    if (socket == null || !(socket instanceof SSLSocket)) {
+      return socket;
     }
+
+    String[] supported = ((SSLSocket) socket).getSupportedProtocols();
+    List<String> filtered = new ArrayList();
+
+    for (int i = 0; i < supported.length; ++i) {
+      if (!this.blacklistedProtocols.contains(supported[i])) {
+        filtered.add(supported[i]);
+      }
+    }
+
+    ((SSLSocket) socket).setEnabledProtocols(filtered.toArray(new String[0]));
+
     return socket;
   }
 }

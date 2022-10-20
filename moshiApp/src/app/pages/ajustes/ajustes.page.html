@@ -1,0 +1,20 @@
+<ion-header>
+  <ion-toolbar color="dark">
+    <ion-title>Ajustes</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content color="dark">
+
+  <ion-list color="dark" style="background-color: transparent;">
+    <ion-item button lines="none" color="dark" (click)="goToMal()">
+      <ion-icon slot="start" name="cloud-download"></ion-icon>
+      <ion-label>Importar de My anime list</ion-label>
+    </ion-item>
+    <ion-item button lines="none" color="dark" (click)="logout()">
+      <ion-icon slot="start" name="log-out"></ion-icon>
+      <ion-label>Cerrar sesión</ion-label>
+    </ion-item>
+
+  </ion-list>
+</ion-content>
