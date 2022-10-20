@@ -122,8 +122,8 @@ export class PaginaAnimePage implements OnInit {
     //TIO ANIME
     var busqueda = this.prepararTitulo(this.anime.title)
     var link = this.servidores[this.servidorActivo].link + busqueda
-    console.log(link)
-    // this.router.navigate(['/pagina-anime/', this.anime.mal_id, link])
+    // console.log(link)
+    this.router.navigate(['/pagina-anime/', this.anime.mal_id, link])
 
     // [routerLink]="['/pagina-anime/',anime.mal_id,url]"
   }

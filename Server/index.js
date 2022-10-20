@@ -49,29 +49,15 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use(express.static(__dirname + '/public'));
 app.get('/', async (req, res) => {
-    (async () => {
-        const browser = await puppeteer.launch();
-        const page = await browser.newPage();
-        await page.goto('https://tioanime.com/ver/pokemon-267');
-        // await page.screenshot({ path: 'example.png' });
-        let twitterFrame // this will be populated later by our identified frame
-
-        for (const frame of page.mainFrame().childFrames()) {
-            // Here you can use few identifying methods like url(),name(),title()
-            if (frame.url().includes('streamium')) {
-                console.log('we found the Twitter iframe')
-                twitterFrame = frame
-                console.log(frame.url())
-                // we assign this frame to myFrame to use it later
-            }
-        }
-
-        await browser.close();
-    })();
-
-    res.json({ data: 'anime' })
-
+    const browser = await puppeteer.launch({ headless: false, args: ['--disable-web-security', '--disable-features=IsolateOrigins', ' --disable-site-isolation-trials'] });
+    const page = await browser.newPage();
+    await page.goto("https://jkanime.net/renai-flops/2/", { waitUntil: 'networkidle2' })
+    var getPTag = page.mainFrame().childFrames()[0]
+    const data = await getPTag.$$eval('video', pElements => pElements.map(el => el.getAttribute('src')))
+    await browser.close();
+    return res.json({ data: data })
 })
+
 app.post('/getUserAnimeList', async (req, res) => {
     var body = req.body
     console.log(body.username)
