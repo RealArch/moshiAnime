@@ -76,7 +76,6 @@ export class LoginPage implements OnInit {
         }).catch(err => {
           //mostrar error 
           //muestra error
-          console.log(err)
           this.loading = false
 
           this.toast('Ha ocurrido un problema al iniciar sesión con Google')
@@ -140,7 +139,6 @@ export class LoginPage implements OnInit {
           //mostrar error 
           //muestra error
           this.loading = false
-          console.log(err)
 
           this.toast('Ha ocurrido un problema al iniciar sesión con Google')
         })
