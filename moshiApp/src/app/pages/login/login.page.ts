@@ -31,10 +31,10 @@ export class LoginPage implements OnInit {
     this.loading = true
     if (Capacitor.getPlatform() == "android") {
       this.auth.loginGoogleAndroid()
-        .then((data:any) => {
+        .then((data: any) => {
           console.log(data)
           this.auth.getUser(data.user.uid)
-            .then(user=>{
+            .then(user => {
               if (user.exists) {
                 this.rouetr.navigate(['/'])
                 this.loading = false
@@ -64,71 +64,83 @@ export class LoginPage implements OnInit {
                     this.toast('Ha ocurrido un problema al iniciar sesión')
                   })
               }
-            }).catch(err=>{
-               //desloguea
-               this.loading = false
-
-               this.auth.logOut()
-               //muestra error
-               this.toast('Ha ocurrido un problema al iniciar sesión')
-            })
-   
-        }).catch(err => {
-          //mostrar error 
-          //muestra error
-          this.loading = false
-
-          this.toast('Ha ocurrido un problema al iniciar sesión con Google')
-        })
-    } else if (Capacitor.getPlatform() == "web") {
-      this.auth.loginGoogleWeb()
-        .then((data:any) => {
-          console.log(data)
-          this.auth.getUser(data.user.uid)
-          .then(user=>{
-            if (user.exists) {
-              this.rouetr.navigate(['/'])
-              this.loading = false
-
-            } else {
-              //Crea el usuario
-              var datos = {
-                uid: data.user.uid,
-                email: data.user.email,
-                nombre: data.additionalUserInfo.profile['given_name'],
-                apellido: data.additionalUserInfo.profile['family_name'],
-                foto: data.additionalUserInfo.profile['picture'],
-                listaAnime: [],
-                malSync: false
-
-              }
-              this.auth.crearUsuarioFirestore(datos)
-                .then(data => {
-                  this.loading = false
-
-                  this.rouetr.navigate(['/'])
-                }).catch(data => {
-                  this.loading = false
-
-                  //desloguea
-                  this.auth.logOut()
-                  //muestra error
-                  this.toast('Ha ocurrido un problema al iniciar sesión')
-                })
-            }
-          }).catch(err=>{
+            }).catch(err => {
               //desloguea
               this.loading = false
 
               this.auth.logOut()
               //muestra error
               this.toast('Ha ocurrido un problema al iniciar sesión')
-          })
+            })
+
+        }).catch(err => {
+          //mostrar error 
+          //muestra error
+          console.log(err)
+          this.loading = false
+
+          this.toast('Ha ocurrido un problema al iniciar sesión con Google')
+        })
+    } else if (Capacitor.getPlatform() == "web") {
+      this.auth.loginGoogleWeb()
+        .then((data: any) => {
+          this.auth.getUser(data.user.uid)
+            .then(user => {
+
+              console.log(user.data())
+              console.log(user.exists())
+              if (user.exists()) {
+                console.log('el usuario existia')
+                this.rouetr.navigate(['/'])
+                this.loading = false
+
+              } else {
+                //Crea el usuario
+                console.log(data)
+                var datos = {
+                  uid: data.user.uid,
+                  email: data.user.email,
+                  // nombre: data.additionalUserInfo.profile['given_name'] || 'testName',
+                  // apellido: data.additionalUserInfo.profile['family_name'] || 'testFamily_name',
+                  // foto: data.additionalUserInfo.profile['picture'] || 'testPicture',
+                  nombre: 'testName',
+                  apellido:  'testFamily_name',
+                  foto: 'testPicture',
+
+                  listaAnime: [],
+                  malSync: false
+
+                }
+                this.auth.crearUsuarioFirestore(datos)
+                  .then(data => {
+                    console.log('cree usuario')
+                    this.loading = false
+
+                    this.rouetr.navigate(['/'])
+                  }).catch(data => {
+                    this.loading = false
+
+                    //desloguea
+                    this.auth.logOut()
+                    //muestra error
+                    this.toast('Ha ocurrido un problema al iniciar sesión')
+                  })
+              }
+            }).catch(err => {
+              console.log(err)
+              //desloguea
+              this.loading = false
+
+              this.auth.logOut()
+              //muestra error
+              this.toast('Ha ocurrido un problema al iniciar sesión')
+            })
 
         }).catch(err => {
           //mostrar error 
           //muestra error
           this.loading = false
+          console.log(err)
 
           this.toast('Ha ocurrido un problema al iniciar sesión con Google')
         })

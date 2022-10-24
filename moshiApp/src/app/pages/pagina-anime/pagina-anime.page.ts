@@ -7,6 +7,8 @@ import { ModalEstatusPage } from './modal-estatus/modal-estatus.page';
 
 import { Auth, getAuth } from '@angular/fire/auth';
 
+// import { VideoPlayer } from '@ionic-native/video-player/ngx';
+import { combineLatest } from 'rxjs';
 
 @Component({
   selector: 'app-pagina-anime',
@@ -50,6 +52,8 @@ export class PaginaAnimePage implements OnInit {
   miInfoAnime: any = '';
   uid: any;
   actualizando: boolean;
+  malId: string;
+  animeData: import("@angular/fire/firestore").DocumentData;
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -60,9 +64,23 @@ export class PaginaAnimePage implements OnInit {
     private modalController: ModalController,
     private navController: NavController,
     private alertController: AlertController,
-    private toastController: ToastController
+    private toastController: ToastController,
+    // private videoPlayer: VideoPlayer
   ) { }
+  async goToVideo(url) {
+    // console.log(1)
+    // try {
+    //   console.log(2)
 
+    //   var aja = await this.videoPlayer.play('http://static.videogular.com/assets/videos/elephants-dream.mp4')
+    //   console.log(3)
+
+    //   console.log(aja)
+    // } catch (error) {
+    //   console.log(error)
+    // }
+
+  }
   ngOnInit() {
     //2 finalizados
     //6 plan to watch
@@ -70,33 +88,31 @@ export class PaginaAnimePage implements OnInit {
     this.uid
     this.loading = true
     var user = getAuth().currentUser
-
+    this.malId = this.activatedRoute.snapshot.paramMap.get('id')
+    console.log(user)
     if (user != null) {
+      console.log(user)
+      combineLatest([
+        this.api.getUserInfo(user.uid),
+        this.api.getAnimeByMalId(this.malId),
+        this.api.getStaffByMalId(this.malId),
+        this.api.getAnimeData(this.malId)
+      ]).subscribe(([userInfo, animeMal, staffMal, animeData]) => {
+        this.uid = user.uid
+        this.userInfo = userInfo
+        this.cargarMiAnime(this.userInfo)
+        this.servidorActivo = localStorage.getItem('servidorActivo') || 0
+        //ANIME MAL
+        this.anime = animeMal['data']
+        //STAFF
+        this.characters = staffMal['data']
+        //ANIMEDATA
+        this.animeData = animeData
+        console.log(this.animeData)
+        //
+        this.loading = false
 
-      this.api.getUserInfo(user.uid)
-        .subscribe(data => {
-          console.log(data)
-          this.uid = user.uid
-          this.userInfo = data
-          this.cargarMiAnime(this.userInfo)
-          this.servidorActivo = localStorage.getItem('servidorActivo') || 0
-          var malId = this.activatedRoute.snapshot.paramMap.get('id')
-          this.api.getAnimeByMalId(malId)
-            .subscribe(data => {
-              this.anime = data['data']
-              console.log(this.anime)
-
-              this.api.getStaffByMalId(this.anime.mal_id)
-                .subscribe((data: any) => {
-                  console.log(data)
-
-                  this.characters = data.data
-                  console.log(this.characters)
-                  this.loading = false
-                })
-            })
-        })
-
+      })
     }
 
   }
@@ -109,7 +125,7 @@ export class PaginaAnimePage implements OnInit {
     }
   }
   cargarMiAnime(userInfo) {
-
+    console.log(userInfo)
     for (let i = 0; i < userInfo.listaAnime.length; i++) {
       if (userInfo.listaAnime[i].mal_id == this.activatedRoute.snapshot.paramMap.get('id')) {
         this.miInfoAnime = userInfo.listaAnime[i]
@@ -122,31 +138,21 @@ export class PaginaAnimePage implements OnInit {
     //TIO ANIME
     var busqueda = this.prepararTitulo(this.anime.title)
     var link = this.servidores[this.servidorActivo].link + busqueda
-    console.log(link)
-    // this.router.navigate(['/pagina-anime/', this.anime.mal_id, link])
+    // console.log(link)
+    this.router.navigate(['/pagina-anime/', this.anime.mal_id, link])
 
     // [routerLink]="['/pagina-anime/',anime.mal_id,url]"
   }
-  prepararTitulo(titulo) {
-    // var excluidos = ['sama', 'chan', 'kun', 'tachi']
-    // var nuevoTitulo
-    // var nuevoTitulo = titulo.split('-')
-    // for (let i = 0; i < nuevoTitulo.length; i++) {
-    //   console.log(nuevoTitulo)
-    //   // busqueda = busqueda.replace(' ','_')
+  prepararTitulo(title) {
 
-    //   let a = nuevoTitulo[i].split(' ')
-    //   if (excluidos.includes(a[0])) {
-    //     nuevoTitulo[i] = '-' + nuevoTitulo[i]
-    //   }
+    title = title.replace(/_|#|:|@|!|<>/g, "")
+    title = title.replaceAll('(', '').toLowerCase()
+    title = title.replaceAll(')', '').toLowerCase()
+    title = title.replaceAll('.', '').toLowerCase()
+    title = title.replaceAll(',', '').toLowerCase()
+    title = title.replaceAll(' ', '-').toLowerCase()
 
-    // }
-    titulo = titulo.replace(' meido ', "maid")
-
-    titulo = titulo.replace(/_|#|:|@|<>/g, "")
-    titulo = titulo.replaceAll(' ', '-').toLowerCase()
-
-    return titulo
+    return title
   }
 
   async presentActionSheet() {

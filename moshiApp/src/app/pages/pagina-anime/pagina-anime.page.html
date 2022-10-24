@@ -2,16 +2,15 @@
   <ion-toolbar color="dark">
     <ion-title>Anime</ion-title>
     <ion-buttons slot="start">
-      <ion-button (click)='goBack()'>
-        <ion-icon slot="icon-only" name="arrow-back-outline" ></ion-icon>
-      </ion-button>
+      <ion-back-button defaultHref="/"></ion-back-button>
+
       <!-- <ion-back-button defaultHref="/explora"></ion-back-button> -->
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content color="dark">
-  <ion-grid *ngIf="loading" >
+<ion-content color="dark">  
+  <ion-grid *ngIf="loading">
     <ion-row class="loading">
       <ion-spinner name="crescent" color="primary"></ion-spinner>
 
@@ -36,7 +35,7 @@
       </ion-col>
 
     </ion-row>
-    <ion-row>   
+    <ion-row>
       <ion-col>
         <ion-button fill="clear" class="w-100" color=light *ngIf="miInfoAnime.watching_status==1"
           (click)="seleccionarStatusModal()">
@@ -88,19 +87,23 @@
         </ion-button>
       </div>
       <div class="w-100 d-flex" *ngIf="miInfoAnime != ''">
-        <ion-button [disabled]="this.miInfoAnime.watched_episodes < 1" (click)="addDeleteEpisode(-1)" expand="block" color="danger" class="w-25">
+        <ion-button [disabled]="this.miInfoAnime.watched_episodes < 1" (click)="addDeleteEpisode(-1)" expand="block"
+          color="danger" class="w-25">
           <ion-icon name="remove-outline"></ion-icon>
         </ion-button>
-        <ion-button *ngIf="anime.episodes!=null" [disabled]="this.miInfoAnime.watched_episodes >= anime.episodes" (click)="addDeleteEpisode(+1)" expand="block" color="success" class="w-25 px-1">
+        <ion-button *ngIf="anime.episodes!=null" [disabled]="this.miInfoAnime.watched_episodes >= anime.episodes"
+          (click)="addDeleteEpisode(+1)" expand="block" color="success" class="w-25 px-1">
           <ion-icon name="add-outline"></ion-icon>
         </ion-button>
-        <ion-button *ngIf="anime.episodes==null" (click)="addDeleteEpisode(+1)" expand="block" color="success" class="w-25 px-1">
+        <ion-button *ngIf="anime.episodes==null" (click)="addDeleteEpisode(+1)" expand="block" color="success"
+          class="w-25 px-1">
           <ion-icon name="add-outline"></ion-icon>
         </ion-button>
-        <ion-button (click)="actualizar()" [disabled]="snapshotMiInfoAnime==miInfoAnime || actualizando" expand="block" fill="outline" class="w-50">
+        <ion-button (click)="actualizar()" [disabled]="snapshotMiInfoAnime==miInfoAnime || actualizando" expand="block"
+          fill="outline" class="w-50">
           <ion-text *ngIf="!actualizando">
             Actualizar
-          </ion-text> 
+          </ion-text>
           <ion-spinner *ngIf="actualizando" name="dots"></ion-spinner>
 
         </ion-button>
@@ -112,6 +115,15 @@
       <ion-button fill="outline" class="w-auto">
         Actualizar MyAnimeList
       </ion-button> -->
+    </ion-row>
+    <ion-row>
+      <ion-col size="12">
+        EPISODIOS
+      </ion-col>
+      <ion-col size="12" *ngFor="let url of animeData.scalpedEpisodes; let i = index">
+        <app-video-item [url]="url" [id]="i+1"></app-video-item>
+
+      </ion-col>
     </ion-row>
     <ion-row>
       <!-- <ion-col *ngFor="episodio of episodios">
@@ -138,7 +150,8 @@
             <ion-slides [options]="slideOpts" class="pb-1">
               <ion-slide *ngFor="let character of characters" [routerLink]="['/pagina-anime',anime.mal_id]">
                 <ion-card class="p-0 m-0 w-100" color="translucent">
-                  <div class="img" [ngStyle]="{'background-image': 'url('+ character.character.images.jpg.image_url +')'}"></div>
+                  <div class="img"
+                    [ngStyle]="{'background-image': 'url('+ character.character.images.jpg.image_url +')'}"></div>
                   <ion-card-content style="padding: 5px;">
                     <!-- <ion-card-subtitle>{{anime.type}}</ion-card-subtitle> -->
                     <div class="nombrePersonaje">{{character.character.name}}</div>

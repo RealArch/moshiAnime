@@ -15,7 +15,12 @@ const routes: Routes = [
   {
     path: 'modal-estatus',
     loadChildren: () => import('./modal-estatus/modal-estatus.module').then( m => m.ModalEstatusPageModule)
-  }
+  },
+  {
+    path: 'video-item',
+    loadChildren: () => import('./video-item/video-item.module').then( m => m.VideoItemPageModule)
+  },
+
 ];
 
 @NgModule({

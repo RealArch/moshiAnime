@@ -14,6 +14,10 @@ const routes: Routes = [
     canActivate: [AuthGuard], data: { authGuardPipe: redirectUnauthorizedToLogin }
   },
   {
+    path: 'pagina-anime/:id/:episodeId',
+    loadChildren: () => import('./pages/pagina-anime/episodie/episodie.module').then( m => m.EpisodiePageModule)
+  },
+  {
     path: 'pagina-anime/:id/:url',
     loadChildren: () => import('./pages/browser/browser.module').then( m => m.BrowserPageModule),
     canActivate: [AuthGuard], data: { authGuardPipe: redirectUnauthorizedToLogin }
@@ -43,7 +47,6 @@ const routes: Routes = [
     path: 'mis-animes',
     loadChildren: () => import('./pages/mis-animes/mis-animes.module').then( m => m.MisAnimesPageModule),
     canActivate: [AuthGuard], data: { authGuardPipe: redirectUnauthorizedToLogin }
-
   },
 ];
 

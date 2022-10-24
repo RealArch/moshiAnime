@@ -3,6 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from './../../environments/environment'
 import { Auth, authState, getAuth } from '@angular/fire/auth';
 import { collectionSnapshots, doc, docData, Firestore, getFirestore, updateDoc } from '@angular/fire/firestore';
+import algoliasearch from "algoliasearch"
+const client = algoliasearch(environment.algolia.appId, environment.algolia.searchKey)
+const animesIndex = client.initIndex(environment.algolia.indexes.animes);
 
 @Injectable({
   providedIn: 'root'
@@ -11,34 +14,50 @@ export class ApiService {
 
   constructor(
     private http: HttpClient,
-    private _auth:Auth,
-    private _firestore:Firestore
+    private _auth: Auth,
+    private _firestore: Firestore
 
   ) { }
+  getAnimeVideo(animeId, episode) {
+    var data = {
+      animeId: animeId,
+      episode: episode
+    }
+    return this.http.post(`${environment.api}api/getAnimeVideo`,data)
+  }
+  getSeasonAnimes(season, year) {
+    return animesIndex.search('', {
+      filters: `season:${season} AND year:${year}`
+    })
+  }
+  getAnimeData(id) {
+    var ref = doc(getFirestore(), 'animes', id)
+    return docData(ref, { idField: id })
+  }
   //USUARIO
-  isLoggedIn(){
+  isLoggedIn() {
     return authState(getAuth())
     // return this.afAuth.authState
   }
-  getUserInfo(uid) { 
+  getUserInfo(uid) {
     var ref = doc(getFirestore(), 'usuarios', uid);
     return docData(ref)
     // return this.firestore.collection('usuarios').doc(uid).snapshotChanges()
   }
-  sincronizarConMal(uid,data){
+  sincronizarConMal(uid, data) {
     var ref = doc(getFirestore(), 'usuarios', uid);
     return updateDoc(ref, {
-      listaAnime:data
+      listaAnime: data
 
     })
     // return this.firestore.collection('usuarios').doc(uid).update({
     //   listaAnime:data
     // })
   }
-  actualizarLista(uid,data){
+  actualizarLista(uid, data) {
     var ref = doc(getFirestore(), 'usuarios', uid);
     return updateDoc(ref, {
-      listaAnime:data
+      listaAnime: data
 
     })
     // return this.firestore.collection('usuarios').doc(uid).update({
@@ -70,11 +89,11 @@ export class ApiService {
   getLinkMal() {
     return this.http.get(`${environment.api}loginMal`)
   }
-  getMalToken(code, code_challenge,uid) {
+  getMalToken(code, code_challenge, uid) {
     var data = {
       code: code,
       code_challenge: code_challenge,
-      udi:uid
+      udi: uid
     }
     return this.http.post(`${environment.api}getMalToken`, data)
   }

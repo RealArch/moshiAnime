@@ -1,7 +1,0 @@
-{
-  "name": "MoshiAnime",
-  "integrations": {
-    "capacitor": {}
-  },
-  "type": "angular"
-}

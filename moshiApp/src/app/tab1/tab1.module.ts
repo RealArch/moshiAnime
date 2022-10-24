@@ -6,9 +6,11 @@ import { Tab1Page } from './tab1.page';
 import { ExploreContainerComponentModule } from '../explore-container/explore-container.module';
 
 import { Tab1PageRoutingModule } from './tab1-routing.module';
+import { SwiperModule } from 'swiper/angular';
 
 @NgModule({
   imports: [
+    SwiperModule,
     IonicModule,
     CommonModule,
     FormsModule,
