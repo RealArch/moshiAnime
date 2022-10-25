@@ -93,17 +93,17 @@ app.post('/getAnimeVideo', async (req, res) => {
         await page.setRequestInterception(true);
         page.on('request', (interceptedRequest) => {
             //'script', 'stylesheet', 'image', 'media', 'font'
-          const blockResources = [ 'stylesheet', 'image', 'media', 'font'];
-          if (blockResources.includes(interceptedRequest.resourceType())) {
-            interceptedRequest.abort();
-          } else {
-            interceptedRequest.continue();
-          }
+            const blockResources = ['stylesheet', 'image', 'media', 'font'];
+            if (blockResources.includes(interceptedRequest.resourceType())) {
+                interceptedRequest.abort();
+            } else {
+                interceptedRequest.continue();
+            }
         });
-        
+
         await page.setUserAgent(
             'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36'
-          );
+        );
 
         await page.goto(`https://jkanime.net/${formatedTitle}/${episode}/`, { waitUntil: 'networkidle2' })
         var iframes = page.mainFrame().childFrames()
@@ -117,6 +117,7 @@ app.post('/getAnimeVideo', async (req, res) => {
 
 })
 app.post('/getSetSeasonAnimes', async (req, res) => {
+    console.log('entre')
     var season = req.body.season;
     var year = req.body.year;
     executeScalp(season, year)
@@ -124,6 +125,7 @@ app.post('/getSetSeasonAnimes', async (req, res) => {
 })
 //funcitons
 async function executeScalp(season, year) {
+
     var season = season;
     var year = year;
     var page = 1;
@@ -145,20 +147,69 @@ async function executeScalp(season, year) {
             has_next_page = false
         }
     }
+    // seasonalAnimes.splice(1)
     const batch = db.batch();
     //Preparar data para la DB
     var errors = []
     var emptyAnimes = []
+    var finalizedAnimeCount = 0
+    var completedAnimes = []
+    var successScraps = 0
+    var metaDataError = []
     for (anime of seasonalAnimes) {
-        var titleFormated = formatName(anime.title)
-        var next = true
         var control = 1
+        var titleFormated = formatName(anime.title)
         var urls = []
+        var exists = false
+        //Si el anime existe en nuestra DB, lee los episodios scalpedEpisodes.
+        //Inicia busqueda desde el ultimo. control = scrapped.length + 1
+        var dbAnime = await db.collection('animes').doc(anime.mal_id.toString()).get()
+        if (dbAnime.exists) {
+            exists = true
+            control = dbAnime.data().scrapedEpisodes.sub_esp.length + 1;
+            titleFormated = dbAnime.data().titleFormated;
+            urls = dbAnime.data().scrapedEpisodes.sub_esp;
+            //PENDIENTE si scrapedEpisodes.sub_esp.length >= anime.episodes && ya no esta en airign, break
+            if (dbAnime.data().scrapedEpisodes.sub_esp.length >= anime.episodes && !anime.airing) {
+                console.log('Anime finalizado y Scrap completo')
+                completedAnimes.push(titleFormated)
+                break
+            }
+        }
+
+        var next = true
         while (next) {
             var click = true
             console.log(titleFormated + '  episodio ' + control)
-            const browser = await puppeteer.launch({ headless: false, args: ['--disable-web-security', '--disable-features=IsolateOrigins', ' --disable-site-isolation-trials'] });
+            const browser = await puppeteer.launch({
+                headless: true,
+                ignoreHTTPSErrors: true,
+                args: [
+                    '--disable-gpu',
+                    '--disable-dev-shm-usage',
+                    '--disable-setuid-sandbox',
+                    '--no-first-run',
+                    '--no-sandbox',
+                    '--no-zygote',
+                    '--window-size=1280,720',
+                ]
+            });
             const page = await browser.newPage();
+            await page.setViewport({ width: 1280, height: 720 });
+            await page.setRequestInterception(true);
+            page.on('request', (interceptedRequest) => {
+                //'script', 'stylesheet', 'image', 'media', 'font'
+                const blockResources = ['stylesheet', 'image', 'media', 'font'];
+                if (blockResources.includes(interceptedRequest.resourceType())) {
+                    interceptedRequest.abort();
+                } else {
+                    interceptedRequest.continue();
+                }
+            });
+            await page.setUserAgent(
+                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36'
+            );
+
             await page.goto(`https://jkanime.net/${titleFormated}/${control}/`, { waitUntil: 'networkidle2' })
             var click = await page.click('#btn-show-4')
                 .catch(() => {
@@ -173,6 +224,7 @@ async function executeScalp(season, year) {
                     console.log('error link')
                     errors.push({
                         anime: titleFormated,
+                        episode: control
                     })
                 }
                 console.log('estaba vacio')
@@ -181,45 +233,141 @@ async function executeScalp(season, year) {
                 break
             }
             await page.click('#btn-show-4')
-            data = await page.$$eval('iframe', pElements => pElements.map(el => el.outerHTML))
+            data = await page.$$eval('iframe', pElements => pElements.map(el => el.getAttribute('src')))
             await browser.close();
-            urls.push({
-                urls: [`https://jkanime.net${data[0]}`],
-                name: null,
-                description: null
-            })
-            control += 1
+            //obtener la miniatura del episodio PENDIENTE
 
+            //obtener title, duration, synopsis
+            let options = {
+                uri: `https://api.jikan.moe/v4/anime/${anime.mal_id}/episodes/${control}`,
+                json: true
+            }
+            var title = null
+            var synopsis = null
+            var duration = null
+            var metaDataTries = 1
+
+            while (metaDataTries < 5) {
+                /*PENDIENTE. 
+                codigo defectuoso
+                A veces no carga. Y eso afecta la velocidad
+                de recoleccion considerablemente
+                En ocasiones no obtiene el resultado luego de 4 intentos.
+                Solucion: cargar un a sola vez todos los metadatos de la serie
+                al inicio del for.
+                */
+                console.log(`intento #${metaDataTries}`)
+                try {
+                    let res = await rp(options)
+                    title = res.data.title
+                    synopsis = res.data.synopsis
+                    duration = res.data.duration
+                    metaDataTries = 5
+                    break;  // 'return' would work here as well
+                } catch (err) {
+                    console.log('error obteniendo metaData episodio')
+                }
+                if (metaDataTries == 4) {
+                    console.log('No pudimos obtener metadata. Saltando este paso')
+
+                    metaDataError.push({
+                        anime: titleFormated,
+                        episode: control
+                    })
+                }
+
+                metaDataTries++;
+            }
+
+
+
+            // let res = await rp(options)
+            //     .then((res) => {
+            //         title = res.data.title
+            //         synopsis = res.data.synopsis
+            //         duration = res.data.duration
+            //     }).catch(async err => {
+            //         while (metaDataTries < 4) {
+            //             console.log(`try #${triesCounter}`)
+            //             try {
+            //                 await kinesis.putRecord(params).promise();
+            //                 break;  // 'return' would work here as well
+            //             } catch (err) {
+            //                 console.log(err);
+            //             }
+            //             triesCounter++;
+            //         }
+
+            //         metaDataError.push({
+            //             anime: titleFormated,
+            //             episode: control
+            //         })
+            //         console.log('error obteniendo metaData episodio')
+            //     })
+
+
+
+
+            urls.push({
+                url: `https://jkanime.net${data[0]}`,
+                title: title,
+                synopsis: synopsis,
+                duration: duration,
+                thumb: ''
+            })
+            successScraps += 1
+            control += 1
+            successScraps += 1
         }
+
         if (urls.length == 0) {
+            //Si scalpedEpisodes == 0 y urls.length == 0
             emptyAnimes.push(titleFormated)
         }
 
-        batch.set(db.collection('animes').doc(anime.mal_id.toString()), {
-            score: anime.score,
-            rank: anime.rank,
-            images: anime.images,
-            trailer: anime.trailer,
-            title: anime.title,
-            title_japanese: anime.title_japanese,
-            type: anime.type,
-            episodes: anime.episodes,
-            aired_from: anime.aired.from,
-            duration: anime.duration,
-            synopsis: anime.synopsis,
-            season: anime.season,
-            year: anime.year,
-            broadcast: anime.broadcast,
-            producers: anime.producers,
-            studios: anime.studios,
-            genres: anime.genres,
-            explicit_genres: anime.explicit_genres,
-            themes: anime.themes,
-            demographics: anime.demographics,
-            downloaded_episodes: 0,
-            lastUpdate: Date.now(),
-            scalpedEpisodes: urls
-        })
+
+        if (exists) {
+            batch.update(db.collection('animes').doc(anime.mal_id.toString()), {
+                score: anime.score || null,
+                rank: anime.rank || null,
+                episodes: anime.episodes,
+                lastUpdate: Date.now(),
+                scrapedEpisodes: {
+                    sub_esp: urls,
+                }
+            }, { merge: true })
+        } else {
+            batch.set(db.collection('animes').doc(anime.mal_id.toString()), {
+                score: anime.score || null,
+                rank: anime.rank || null,
+                images: anime.images,
+                trailer: anime.trailer || null,
+                title: anime.title,
+                title_japanese: anime.title_japanese || null,
+                type: anime.type,
+                episodes: anime.episodes,
+                aired_from: anime.aired.from,
+                duration: anime.duration,
+                synopsis: anime.synopsis,
+                season: anime.season,
+                year: anime.year,
+                broadcast: anime.broadcast,
+                producers: anime.producers,
+                studios: anime.studios,
+                genres: anime.genres,
+                explicit_genres: anime.explicit_genres,
+                themes: anime.themes,
+                demographics: anime.demographics,
+                downloaded_episodes: 0,
+                lastUpdate: Date.now(),
+                scrapedEpisodes: {
+                    sub_esp: urls,
+                },
+                titleFormated: titleFormated
+            })
+        }
+        finalizedAnimeCount += 1
+        console.log(`${finalizedAnimeCount}/${seasonalAnimes.length} animes completados`)
     };
 
 
@@ -230,8 +378,12 @@ async function executeScalp(season, year) {
     batch.set(db.collection('statitics').doc('logs'), {
         getSetSeasonAnimes: admin.firestore.FieldValue.arrayUnion({
             date: Date.now(),
-            logs: errors,
-            emptyAnimes: emptyAnimes
+            errors: errors,
+            emptyAnimes: emptyAnimes,
+            completedAnimes: completedAnimes,
+            fetchedAnimes: seasonalAnimes.length,
+            successScraps: successScraps,
+            metaDataError: metaDataError
         })
     }, { merge: true })
 
@@ -251,7 +403,7 @@ function formatName(title) {
     return title
 }
 
-exports.api = functions.runWith({memory:"2GB"}).https.onRequest(app)
+exports.api = functions.runWith({ memory: "2GB" }).https.onRequest(app)
 
 exports.animeCreated = functions.firestore
     .document('animes/{animesID}')
