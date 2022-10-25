@@ -6,6 +6,10 @@ import { ModalEpisodiosPage } from './modal-episodios/modal-episodios.page';
 import { ModalEstatusPage } from './modal-estatus/modal-estatus.page';
 
 import { Auth, getAuth } from '@angular/fire/auth';
+import { AndroidFullScreen } from '@awesome-cordova-plugins/android-full-screen/ngx';
+
+import { VgApiService } from '@videogular/ngx-videogular/core';
+
 
 // import { VideoPlayer } from '@ionic-native/video-player/ngx';
 import { combineLatest } from 'rxjs';
@@ -16,6 +20,7 @@ import { combineLatest } from 'rxjs';
   styleUrls: ['./pagina-anime.page.scss'],
 })
 export class PaginaAnimePage implements OnInit {
+  apiVideogular: VgApiService;
   anime
   loading: boolean;
   urlTioAnime: string;
@@ -56,6 +61,7 @@ export class PaginaAnimePage implements OnInit {
   animeData: import("@angular/fire/firestore").DocumentData;
 
   constructor(
+    private androidFullScreen: AndroidFullScreen,
     private activatedRoute: ActivatedRoute,
     private api: ApiService,
     private actionSheetController: ActionSheetController,
@@ -67,20 +73,7 @@ export class PaginaAnimePage implements OnInit {
     private toastController: ToastController,
     // private videoPlayer: VideoPlayer
   ) { }
-  async goToVideo(url) {
-    // console.log(1)
-    // try {
-    //   console.log(2)
 
-    //   var aja = await this.videoPlayer.play('http://static.videogular.com/assets/videos/elephants-dream.mp4')
-    //   console.log(3)
-
-    //   console.log(aja)
-    // } catch (error) {
-    //   console.log(error)
-    // }
-
-  }
   ngOnInit() {
     //2 finalizados
     //6 plan to watch
@@ -94,18 +87,17 @@ export class PaginaAnimePage implements OnInit {
       console.log(user)
       combineLatest([
         this.api.getUserInfo(user.uid),
-        this.api.getAnimeByMalId(this.malId),
-        this.api.getStaffByMalId(this.malId),
+        // this.api.getAnimeByMalId(this.malId),
+        // this.api.getStaffByMalId(this.malId),
         this.api.getAnimeData(this.malId)
-      ]).subscribe(([userInfo, animeMal, staffMal, animeData]) => {
+      ]).subscribe(([userInfo, animeData]) => {
         this.uid = user.uid
         this.userInfo = userInfo
         this.cargarMiAnime(this.userInfo)
         this.servidorActivo = localStorage.getItem('servidorActivo') || 0
         //ANIME MAL
-        this.anime = animeMal['data']
-        //STAFF
-        this.characters = staffMal['data']
+        // this.anime = animeMal['data']
+
         //ANIMEDATA
         this.animeData = animeData
         console.log(this.animeData)
@@ -113,9 +105,16 @@ export class PaginaAnimePage implements OnInit {
         this.loading = false
 
       })
+      this.api.getStaffByMalId(this.malId)
+        .subscribe(staffMal => {
+          //STAFF
+          this.characters = staffMal['data']
+        })
+
     }
 
   }
+
   goBack() {
     if (this.snapshotMiInfoAnime != this.miInfoAnime) {
       this.confirmacionSalida()

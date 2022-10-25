@@ -25,24 +25,8 @@ export class VideoItemPage implements OnInit {
     console.log(this.id)
   }
   async ngAfterViewInit() {
-    // const info = await Device.getInfo();
-    // var platform = Capacitor.getPlatform()
-    // if (platform === "ios" || platform === "android") {
-    //   this.videoPlayer = CapacitorVideoPlayer;
-    // } else {
-    //   this.videoPlayer = PluginsLibrary.CapacitorVideoPlayer
-    // }
+
   }
-  onMessage(event: CustomEvent<any>) {
-    const message = event.detail;
-  }
-  play(url: string) {
-    // console.log(this.videoPlayer)
-    // this.videoPlayer.play('file:///android_asset/www/movie.mp4')
-    // document.addEventListener('jeepCapVideoPlayerPlay', (e: CustomEvent) => { console.log('Event jeepCapVideoPlayerPlay ', e.detail) }, false);
-    // document.addEventListener('jeepCapVideoPlayerPause', (e: CustomEvent) => { console.log('Event jeepCapVideoPlayerPause ', e.detail) }, false);
-    // document.addEventListener('jeepCapVideoPlayerEnded', (e: CustomEvent) => { console.log('Event jeepCapVideoPlayerEnded ', e.detail) }, false);
-    // const res: any = await this.videoPlayer.initPlayer({ mode: "fullscreen", url: url, playerId:'playerid' });
-  }
+
 
 }

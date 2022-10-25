@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from './../../environments/environment'
 import { Auth, authState, getAuth } from '@angular/fire/auth';
-import { collectionSnapshots, doc, docData, Firestore, getFirestore, updateDoc } from '@angular/fire/firestore';
+import { collectionSnapshots, doc, docData, Firestore, getFirestore, runTransaction, setDoc, updateDoc } from '@angular/fire/firestore';
 import algoliasearch from "algoliasearch"
 const client = algoliasearch(environment.algolia.appId, environment.algolia.searchKey)
 const animesIndex = client.initIndex(environment.algolia.indexes.animes);
@@ -18,12 +18,23 @@ export class ApiService {
     private _firestore: Firestore
 
   ) { }
+  getPublicUserData(uid) {
+    var ref = doc(getFirestore(), 'usuariosPublic', uid)
+    return docData(ref, { idField: uid })
+  }
+  updateAnime(uid) {
+    // var ref = doc(getFirestore(), 'usuariosPublic', uid)
+    // runTransaction(getFirestore())
+    // return setDoc(ref, {
+
+    // }, { merge: true })
+  }
   getAnimeVideo(animeId, episode) {
     var data = {
       animeId: animeId,
       episode: episode
     }
-    return this.http.post(`${environment.api}api/getAnimeVideo`,data)
+    return this.http.post(`${environment.api}api/getAnimeVideo`, data)
   }
   getSeasonAnimes(season, year) {
     return animesIndex.search('', {

@@ -10,14 +10,14 @@
 <ion-content color="medium">
   <div  class="video_box d-flex align-items-center justify-content-center">
     <ion-spinner color="light" *ngIf="loadingVideo"></ion-spinner>
-    <vg-player *ngIf="!loadingVideo">
+    <vg-player *ngIf="!loadingVideo" (onPlayerReady)="onPlayerReady($event)" >
       <vg-overlay-play></vg-overlay-play>
       <vg-buffering></vg-buffering>
       <vg-scrub-bar>
         <vg-scrub-bar-current-time></vg-scrub-bar-current-time>
         <vg-scrub-bar-buffering-time></vg-scrub-bar-buffering-time>
       </vg-scrub-bar>
-      <vg-controls>
+      <vg-controls [vgAutohide]="true">
         <vg-play-pause></vg-play-pause>
         <!-- <vg-playback-button></vg-playback-button> -->
         <!-- <vg-time-display vgProperty="current" vgFormat="mm:ss"></vg-time-display> -->

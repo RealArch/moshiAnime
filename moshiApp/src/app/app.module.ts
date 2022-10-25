@@ -72,7 +72,8 @@ import { SwiperModule } from 'swiper/angular';
     GooglePlus,
     HTTP,
     InAppBrowser,
-    VideoPlayer
+    VideoPlayer, 
+    ScreenOrientation
   ],
   bootstrap: [AppComponent],
 })

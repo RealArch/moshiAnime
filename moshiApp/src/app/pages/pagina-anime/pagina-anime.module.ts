@@ -11,13 +11,22 @@ import { VideoItemPage } from './video-item/video-item.page';
 import { VideoPlayer } from '@awesome-cordova-plugins/video-player/ngx';
 import { VideoItemPageModule } from './video-item/video-item.module';
 
+import { VgCoreModule } from '@videogular/ngx-videogular/core';
+import { VgControlsModule } from '@videogular/ngx-videogular/controls';
+import { VgOverlayPlayModule } from '@videogular/ngx-videogular/overlay-play';
+import { VgBufferingModule } from '@videogular/ngx-videogular/buffering';
+
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     IonicModule,
     PaginaAnimePageRoutingModule,
-    VideoItemPageModule
+    VideoItemPageModule,
+    VgCoreModule,
+    VgControlsModule,
+    VgOverlayPlayModule,
+    VgBufferingModule,
   ],
   declarations: [PaginaAnimePage],
   providers:[VideoPlayer,VideoItemPageModule]
