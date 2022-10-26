@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from './../../environments/environment'
-import { Auth, authState, getAuth } from '@angular/fire/auth';
+import { Auth, authState, getAuth, user } from '@angular/fire/auth';
 import { collectionSnapshots, doc, docData, Firestore, getFirestore, runTransaction, setDoc, updateDoc } from '@angular/fire/firestore';
 import algoliasearch from "algoliasearch"
 const client = algoliasearch(environment.algolia.appId, environment.algolia.searchKey)
@@ -18,26 +18,144 @@ export class ApiService {
     private _firestore: Firestore
 
   ) { }
+  searchTimeAnimeEpisode(episodeId, animeId, viewedAnimes) {
+    console.log(episodeId)
+    for (let i = 0; i < viewedAnimes.length; i++) {
+      if (viewedAnimes[i].animeId == animeId) {
+        console.log("encontramos el anime")
+        //Luego buscar el id del espisodio
+        for (let j = 0; j < viewedAnimes[i].episodes.length; j++) {
+          if (viewedAnimes[i].episodes[j].episodeId == episodeId) {
+            console.log("encontramos el episodio")
+            //calcular porcentaje entre 0 y 1
+            return viewedAnimes[i].episodes[j].lastTime
+          }
+        }
+        return 0
+      }
+    }
+    return 0
+  }
   getPublicUserData(uid) {
-    var ref = doc(getFirestore(), 'usuariosPublic', uid)
+    //get data
+    var ref = doc(getFirestore(), 'userPublic', uid)
     return docData(ref, { idField: uid })
   }
-  updateAnime(uid) {
-    // var ref = doc(getFirestore(), 'usuariosPublic', uid)
-    // runTransaction(getFirestore())
-    // return setDoc(ref, {
+  updateAnime(userId, time, animeId, episodeId, duration) {
+    console.log('duracion: ' + episodeId)
+    episodeId = parseInt(episodeId)
+    var ref = doc(getFirestore(), 'userPublic', userId)
+    return runTransaction(getFirestore(), async (transaction) => {
+      const user = await transaction.get(ref);
+      //Si no existe userPublic, crearlo
+      var viewedAnimes = []
+      var dateNow = Date.now()
+      console.log('consegui el user')
+      //si no existe usuario, o no tiene animes vsitos
+      if (!user.exists() || !user.data().viewedAnimes || user.data().viewedAnimes.length == 0) {
+        console.log('no existia')
+        viewedAnimes = [
+          {
+            animeId: animeId,
+            lastUpdateDate: dateNow,
+            episodes: [
+              {
+                episodeId: episodeId,
+                lastTime: time,
+                duration: duration,
+                lastUpdateDate: dateNow
+              }
+            ]
+          }
+        ]
+        return transaction.set(ref, {
+          viewedAnimes: viewedAnimes
+        }, { merge: true })
+      }
+      //Si si existe el usuario o tiene animes vistos
+      viewedAnimes = user.data().viewedAnimes
+      //leer todos los viewAnime
+      for (let i = 0; i < viewedAnimes.length; i++) {
+        //Encontrar nuestro anime
+        if (viewedAnimes[i].animeId == animeId) {
+          //si esta vacio
+          if (viewedAnimes[i].episodes.length == 0) {
+            console.log("no encontramos el episodios en la db")
+            viewedAnimes[i].episodes.push({
+              episodeId: episodeId,
+              lastTime: time,
+              duration: duration,
+              lastUpdateDate: dateNow
+            })
+            //Guardar la nueva data
+            return transaction.set(ref, {
+              viewedAnimes: viewedAnimes
+            }, { merge: true })
+          }
+          //si esta lleno            
+          //buscamos el episodio
+          var episodioEncontrado = false
+          for (let j = 0; j < viewedAnimes[i].episodes.length; j++) {
+            //si existe, lo actualizamos
+            if (viewedAnimes[i].episodes[j].episodeId == episodeId) {
+              console.log("encontramos el episodio")
+              viewedAnimes[i].episodes[j].lastTime = time;
+              viewedAnimes[i].episodes[j].lastUpdateDate = dateNow;
+              viewedAnimes[i].episodes[j].duration = duration;
+              //Guardar la nueva data
+              return transaction.set(ref, {
+                viewedAnimes: viewedAnimes
+              }, { merge: true })
+            }
+          }
+          //sin no existe, push
 
-    // }, { merge: true })
+          console.log("no encontramos el episodio")
+          viewedAnimes[i].episodes.push({
+            episodeId: episodeId,
+            lastTime: time,
+            duration: duration,
+            lastUpdateDate: dateNow
+          })
+          //Guardar la nueva data
+          return transaction.set(ref, {
+            viewedAnimes: viewedAnimes
+          }, { merge: true })
+        }
+      }
+      //no se consiguió el anime en la lista de vistos
+      viewedAnimes.push({
+        animeId: animeId,
+        lastUpdateDate: dateNow,
+        episodes: [
+          {
+            episodeId: episodeId,
+            lastTime: time,
+            duration: duration,
+            lastUpdateDate: dateNow
+          }
+        ]
+      })
+      transaction.set(ref, {
+        viewedAnimes: viewedAnimes
+      }, { merge: true })
+
+      console.log('sin errores')
+      console.log(viewedAnimes)
+
+
+    });
   }
   getAnimeVideo(animeId, episode) {
     var data = {
       animeId: animeId,
       episode: episode
     }
-    return this.http.post(`${environment.api}api/getAnimeVideo`, data)
+    return this.http.post(`${environment.api}api/getAnimeVideo`, data) 
   }
   getSeasonAnimes(season, year) {
     return animesIndex.search('', {
+      numericFilters:`totalScraped_sub_esp > 0`,
       filters: `season:${season} AND year:${year}`
     })
   }

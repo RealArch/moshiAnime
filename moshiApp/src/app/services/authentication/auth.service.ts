@@ -16,6 +16,9 @@ export class AuthService {
     private googlePlus: GooglePlus
 
   ) { }
+  getCurrentUser(){
+    return getAuth().currentUser
+  }
   getUser(uid) {
     console.log(uid)
     var ref = doc(getFirestore(), 'usuarios', uid);

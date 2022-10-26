@@ -44,11 +44,9 @@ export class LoginPage implements OnInit {
                 var datos = {
                   uid: data.user.uid,
                   email: data.user.email,
-                  nombre: data.additionalUserInfo.profile['given_name'],
-                  apellido: data.additionalUserInfo.profile['family_name'],
-                  foto: data.additionalUserInfo.profile['picture'],
-                  listaAnime: [],
-                  malSync: false
+                  nombre: data._tokenResponse.firstName,
+                  apellido: data._tokenResponse.lastName,
+                  foto: data._tokenResponse.photoUrl,
                 }
                 this.auth.crearUsuarioFirestore(datos)
                   .then(data => {
@@ -99,15 +97,14 @@ export class LoginPage implements OnInit {
                 var datos = {
                   uid: data.user.uid,
                   email: data.user.email,
-                  // nombre: data.additionalUserInfo.profile['given_name'] || 'testName',
-                  // apellido: data.additionalUserInfo.profile['family_name'] || 'testFamily_name',
-                  // foto: data.additionalUserInfo.profile['picture'] || 'testPicture',
-                  nombre: 'testName',
-                  apellido:  'testFamily_name',
-                  foto: 'testPicture',
+                  nombre: data._tokenResponse.firstName,
+                  apellido: data._tokenResponse.lastName,
+                  foto: data._tokenResponse.photoUrl,
+                  // nombre: 'testName',
+                  // apellido:  'testFamily_name',
+                  // foto: 'testPicture',
 
-                  listaAnime: [],
-                  malSync: false
+
 
                 }
                 this.auth.crearUsuarioFirestore(datos)

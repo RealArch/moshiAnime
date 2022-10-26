@@ -52,13 +52,15 @@ export class PaginaAnimePage implements OnInit {
     freeMode: true
   };
   characters: any;
-  userInfo: any;
+  // userInfo: any;
   snapshotMiInfoAnime: string;
   miInfoAnime: any = '';
   uid: any;
   actualizando: boolean;
   malId: string;
   animeData: import("@angular/fire/firestore").DocumentData;
+  userData: import("@angular/fire/firestore").DocumentData;
+  queryAnimeTitle: any;
 
   constructor(
     private androidFullScreen: AndroidFullScreen,
@@ -82,28 +84,20 @@ export class PaginaAnimePage implements OnInit {
     this.loading = true
     var user = getAuth().currentUser
     this.malId = this.activatedRoute.snapshot.paramMap.get('id')
-    console.log(user)
+    this.queryAnimeTitle = this.activatedRoute.snapshot.queryParamMap.get('title')
+    console.log(this.queryAnimeTitle)
     if (user != null) {
-      console.log(user)
       combineLatest([
-        this.api.getUserInfo(user.uid),
-        // this.api.getAnimeByMalId(this.malId),
-        // this.api.getStaffByMalId(this.malId),
-        this.api.getAnimeData(this.malId)
-      ]).subscribe(([userInfo, animeData]) => {
+        this.api.getAnimeData(this.malId),
+        this.api.getPublicUserData(user.uid)
+      ]).subscribe(([animeData, userData]) => {
         this.uid = user.uid
-        this.userInfo = userInfo
-        this.cargarMiAnime(this.userInfo)
-        this.servidorActivo = localStorage.getItem('servidorActivo') || 0
-        //ANIME MAL
-        // this.anime = animeMal['data']
-
-        //ANIMEDATA
+        //animeData
         this.animeData = animeData
-        console.log(this.animeData)
-        //
+        //userData
+        this.userData = userData
+        this.addTimeToEpisode(this.malId, this.userData.viewedAnimes, this.animeData)
         this.loading = false
-
       })
       this.api.getStaffByMalId(this.malId)
         .subscribe(staffMal => {
@@ -113,6 +107,39 @@ export class PaginaAnimePage implements OnInit {
 
     }
 
+  }
+  addTimeToEpisode(animeId, viewedAnimes, animeData) {
+    for (let j = 0; j < animeData.scrapedEpisodes.sub_esp.length; j++) {
+      animeData.scrapedEpisodes.sub_esp[j].viewedPercentage = this.getTimeFromId(animeId, j+1, viewedAnimes)
+    }
+  }
+  getTimeFromId(animeId, episodeId, viewedAnimes) {
+  //  console.log(episodeId)
+   console.log(viewedAnimes)
+  //  console.log(animeId)
+    for (let i = 0; i < viewedAnimes.length; i++) {
+      //leer todos lo animes vistos
+      //si coincide con este animeId, comparar
+
+
+
+      console.log(viewedAnimes[i].animeId)
+      console.log(animeId)
+      if (viewedAnimes[i].animeId == animeId) {
+        console.log("encontramos el anime")
+        //Luego buscar el id del espisodio
+        for (let j = 0; j < viewedAnimes[i].episodes.length; j++) {
+          if (viewedAnimes[i].episodes[j].episodeId == episodeId) {
+            console.log("encontramos el episodio")
+            //calcular porcentaje entre 0 y 1
+            var percentage = viewedAnimes[i].episodes[j].lastTime * 100 / viewedAnimes[i].episodes[j].duration
+            return percentage / 100
+          }
+        }
+        return 0
+      }
+    }
+    return 0
   }
 
   goBack() {
@@ -223,52 +250,52 @@ export class PaginaAnimePage implements OnInit {
     return await modal.present();
   }
   actualizar() {
-    this.actualizando = true
-    this.prepararArray()
-    this.api.actualizarLista(this.uid, this.userInfo.listaAnime)
-      .then(data => {
-        this.actualizando = false
-        console.log('si guarde')
-        this.toast('Tu perfil ha sido actualizado')
+    // this.actualizando = true
+    // this.prepararArray()
+    // this.api.actualizarLista(this.uid, this.userInfo.listaAnime)
+    //   .then(data => {
+    //     this.actualizando = false
+    //     console.log('si guarde')
+    //     this.toast('Tu perfil ha sido actualizado')
 
-      }).catch(err => {
-        this.actualizando = false
-        console.log(err)
-        this.toast('Ocurrió un error al actualizar el perfil')
+    //   }).catch(err => {
+    //     this.actualizando = false
+    //     console.log(err)
+    //     this.toast('Ocurrió un error al actualizar el perfil')
 
-      })
+    //   })
   }
   actualizarSalir() {
-    this.actualizando = true
-    this.prepararArray()
-    console.log('entre a actualizar')
-    this.api.actualizarLista(this.uid, this.userInfo.listaAnime)
-      .then(data => {
-        this.actualizando = false
-        console.log('si guarde')
-        this.toast('Tu perfil ha sido actualizado')
-        this.navController.back()
-      }).catch(err => {
-        this.toast('Ocurrió un error al actualizar el perfil')
+    // this.actualizando = true
+    // this.prepararArray()
+    // console.log('entre a actualizar')
+    // this.api.actualizarLista(this.uid, this.userInfo.listaAnime)
+    //   .then(data => {
+    //     this.actualizando = false
+    //     console.log('si guarde')
+    //     this.toast('Tu perfil ha sido actualizado')
+    //     this.navController.back()
+    //   }).catch(err => {
+    //     this.toast('Ocurrió un error al actualizar el perfil')
 
-        this.actualizando = false
-        console.log(err)
-      })
+    //     this.actualizando = false
+    //     console.log(err)
+    //   })
   }
   prepararArray() {
-    var existe = false
-    var index
-    for (let i = 0; i < this.userInfo.listaAnime.length; i++) {
-      if (this.userInfo.listaAnime[i].mal_id == this.miInfoAnime.mal_id) {
-        existe = true
-        index = i
-      }
-    }
-    if (existe) {
-      this.userInfo.listaAnime[index] = this.miInfoAnime
-    } else {
-      this.userInfo.listaAnime.push(this.miInfoAnime)
-    }
+    // var existe = false
+    // var index
+    // for (let i = 0; i < this.userInfo.listaAnime.length; i++) {
+    //   if (this.userInfo.listaAnime[i].mal_id == this.miInfoAnime.mal_id) {
+    //     existe = true
+    //     index = i
+    //   }
+    // }
+    // if (existe) {
+    //   this.userInfo.listaAnime[index] = this.miInfoAnime
+    // } else {
+    //   this.userInfo.listaAnime.push(this.miInfoAnime)
+    // }
   }
   addDeleteEpisode(cantidad) {
     console.log(this.miInfoAnime)
@@ -314,7 +341,7 @@ export class PaginaAnimePage implements OnInit {
     const toast = await this.toastController.create({
       message: msg,
       position: 'bottom',
-      duration: 5000,
+      duration: 20000,
       buttons: [
         {
           text: 'Ok',

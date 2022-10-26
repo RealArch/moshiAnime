@@ -12,12 +12,11 @@ import { SwiperOptions } from 'swiper';
 })
 export class Tab1Page {
   topTv: any;
-  slideOpts:SwiperOptions = {
-    loop: true,
+  slideOpts: SwiperOptions = {
     initialSlide: 0,
     slidesPerView: 3,
     spaceBetween: 5,
-    freeMode:true
+    freeMode: true
 
 
   };
@@ -32,43 +31,17 @@ export class Tab1Page {
   constructor(
     private api: ApiService,
   ) {
-    this.loadingTv=true
-    this.loadingUpcoming=true
-    this.loadingAiring=true
+    this.loadingTv = true
+    this.loadingUpcoming = true
+    this.loadingAiring = true
 
     combineLatest([
-      this.api.getSeasonAnimes('fall',2022),
-      // this.api.getTopTv(),
-      // this.api.getTopUpcoming(),
-      // this.api.getTopAiring()
-    ]).subscribe(([season])=>{//tv,upcoming,airing
+      this.api.getSeasonAnimes('fall', 2022),
+    ]).subscribe(([season]) => {//tv,upcoming,airing
       this.season = season.hits
-      // this.topTv = tv['data']
-      // this.topUpcoming = upcoming['data']
-      // this.topAiring = airing['data']
-      // this.loading=false
+      console.log(this.season)
     })
-    // this.api.getTopTv()
-    //   .subscribe(data => {
-    //     this.topTv = data['data']
-    //     this.loadingUpcoming=false
-    //     console.log(data)
-    //   })
-    // this.api.getTopUpcoming()
-    //   .subscribe(data => {
-    //     this.topUpcoming = data['data']
-    //     this.loadingTv=false
-    //     console.log(this.topUpcoming)
 
-    //   })
-    // this.api.getTopAiring()
-    //   .subscribe(data => {
-    //     this.topAiring = data['data']
-    //     this.loadingAiring=false
-    //     console.log(this.topAiring)
-
-
-    //   })
 
   }
   onSwiper(swiper) {

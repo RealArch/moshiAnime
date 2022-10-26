@@ -25,7 +25,19 @@ app.post('/test', async (req, res) => {
     //     console.log('lo hice');
     // });
 })
-app.post('/', async (req, res) => {
+app.get('/', async (req, res) => {
+    var animeData = await db.collection('animes').get()
+    const batch = db.batch()
+    animeData.forEach(anime => {
+        batch.update(db.collection('animes').doc(anime.id), {
+            scrapedEpisodes: {
+                sub_esp: []
+            },
+            totalScraped_sub_esp: 0
+        })
+    })
+    batch.commit()
+    return res.send('okok')
     // var errors = []
     // var data = []
     // try {
@@ -75,7 +87,6 @@ app.post('/getAnimeVideo', async (req, res) => {
             {
                 headless: true,
                 ignoreHTTPSErrors: true,
-                slowMo: 0,
                 args: [
                     '--disable-gpu',
                     '--disable-dev-shm-usage',
@@ -147,7 +158,7 @@ async function executeScalp(season, year) {
             has_next_page = false
         }
     }
-    // seasonalAnimes.splice(1)
+    seasonalAnimes.splice(1)
     const batch = db.batch();
     //Preparar data para la DB
     var errors = []
@@ -161,6 +172,8 @@ async function executeScalp(season, year) {
         var titleFormated = formatName(anime.title)
         var urls = []
         var exists = false
+        var lastUpdateDate = Date.now()
+
         //Si el anime existe en nuestra DB, lee los episodios scalpedEpisodes.
         //Inicia busqueda desde el ultimo. control = scrapped.length + 1
         var dbAnime = await db.collection('animes').doc(anime.mal_id.toString()).get()
@@ -168,8 +181,9 @@ async function executeScalp(season, year) {
             exists = true
             control = dbAnime.data().scrapedEpisodes.sub_esp.length + 1;
             titleFormated = dbAnime.data().titleFormated;
+            lastUpdateDate = dbAnime.data().lastUpdate;
             urls = dbAnime.data().scrapedEpisodes.sub_esp;
-            //PENDIENTE si scrapedEpisodes.sub_esp.length >= anime.episodes && ya no esta en airign, break
+            //si scrapedEpisodes.sub_esp.length >= anime.episodes && ya no esta en airign, break
             if (dbAnime.data().scrapedEpisodes.sub_esp.length >= anime.episodes && !anime.airing) {
                 console.log('Anime finalizado y Scrap completo')
                 completedAnimes.push(titleFormated)
@@ -279,35 +293,6 @@ async function executeScalp(season, year) {
                 metaDataTries++;
             }
 
-
-
-            // let res = await rp(options)
-            //     .then((res) => {
-            //         title = res.data.title
-            //         synopsis = res.data.synopsis
-            //         duration = res.data.duration
-            //     }).catch(async err => {
-            //         while (metaDataTries < 4) {
-            //             console.log(`try #${triesCounter}`)
-            //             try {
-            //                 await kinesis.putRecord(params).promise();
-            //                 break;  // 'return' would work here as well
-            //             } catch (err) {
-            //                 console.log(err);
-            //             }
-            //             triesCounter++;
-            //         }
-
-            //         metaDataError.push({
-            //             anime: titleFormated,
-            //             episode: control
-            //         })
-            //         console.log('error obteniendo metaData episodio')
-            //     })
-
-
-
-
             urls.push({
                 url: `https://jkanime.net${data[0]}`,
                 title: title,
@@ -315,9 +300,11 @@ async function executeScalp(season, year) {
                 duration: duration,
                 thumb: ''
             })
+            //Actualizar lastUpdate
+
             successScraps += 1
+            lastUpdateDate = Date.now()
             control += 1
-            successScraps += 1
         }
 
         if (urls.length == 0) {
@@ -331,10 +318,11 @@ async function executeScalp(season, year) {
                 score: anime.score || null,
                 rank: anime.rank || null,
                 episodes: anime.episodes,
-                lastUpdate: Date.now(),
+                lastUpdate: lastUpdateDate,
                 scrapedEpisodes: {
                     sub_esp: urls,
-                }
+                },
+                totalScraped_sub_esp: urls.length
             }, { merge: true })
         } else {
             batch.set(db.collection('animes').doc(anime.mal_id.toString()), {
@@ -359,10 +347,11 @@ async function executeScalp(season, year) {
                 themes: anime.themes,
                 demographics: anime.demographics,
                 downloaded_episodes: 0,
-                lastUpdate: Date.now(),
+                lastUpdate: lastUpdateDate,
                 scrapedEpisodes: {
                     sub_esp: urls,
                 },
+                totalScraped_sub_esp: urls.length,
                 titleFormated: titleFormated
             })
         }
@@ -427,4 +416,12 @@ exports.animeUpdated = functions.firestore
         const index = client.initIndex(ALGOLIA_INDEX_NAME);
         index.saveObject(anime);
         return
+    })
+exports.userCreated = functions.firestore
+    .document('usuarios/{usuarioId}')
+    .onCreate(async (snap, context) => {
+        //crear tambien el userPublic
+        db.collection('userPublic').doc(snap.id).set({
+            viewedAnimes: []
+        })
     })

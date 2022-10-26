@@ -1,10 +1,35 @@
-.videoHolder{
+.videoHolder {
     background-color: var(--ion-color-dark-shade);
     height: 75px;
+    background-position: center;
+    background-size: cover;
 }
-.frame_episode{
+
+.frame_episode {
     position: relative;
-    bottom:0;
+    bottom: 0;
     background-color: var(--ion-color-dark);
     height: 30px;
+}
+.play_icon{
+    background-color: var(--ion-color-dark);
+    border-radius: 100%;
+    width: 35px;
+    height: 35px;
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+}
+.title{
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.line-clamp{
+    display: -webkit-box;
+    max-width: 200px;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.synopsis{
+    color: rgb(142, 142, 142);
 }

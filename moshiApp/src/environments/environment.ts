@@ -1,11 +1,11 @@
 // This file can be replaced during build by using the `fileReplacements` array.
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
-var env = 'test'
+var env = 'prod'
 export const environment = {
   useEmulators:true,
   production: false,
-  api: 'http://localhost:5001/moshianimeapp/us-central1/',
+  api: 'https://us-central1-moshianimeapp.cloudfunctions.net/',
   firebase: {
     apiKey: "AIzaSyBywZj_-QG-2s2E-sU4rq6JIqGmgJ4DKvs",
     authDomain: "moshianimeapp.firebaseapp.com",

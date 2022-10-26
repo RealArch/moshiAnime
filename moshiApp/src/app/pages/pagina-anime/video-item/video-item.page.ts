@@ -12,17 +12,19 @@ import { VideoPlayer } from '@awesome-cordova-plugins/video-player/ngx';
   styleUrls: ['./video-item.page.scss'],
 })
 export class VideoItemPage implements OnInit {
-  @Input('url') url
   @Input('id') id
+  @Input('viewedPercentage') viewedPercentage
+  @Input('animeData') animeData
+  @Input('episodeData') episodeData
+
+  
+  
   params
   constructor(
     private videoPlayer: VideoPlayer
   ) { }
 
   ngOnInit() {
-    this.url = 'https://media.vimejs.com/720p.mp4'
-    console.log(this.url)
-    console.log(this.id)
   }
   async ngAfterViewInit() {
 
