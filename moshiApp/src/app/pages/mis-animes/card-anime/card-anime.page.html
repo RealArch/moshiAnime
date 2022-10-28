@@ -1,26 +1,24 @@
-<ion-card class=" m-0" color="medium" *ngIf="!loading" button [routerLink]="['/pagina-anime',this.malId]">
+<ion-card [routerLink]="['/pagina-anime',animeData.objectID, ]" [queryParams]="{title: animeData.title}" color="medium" button class="m-0">
   <ion-row>
-    <ion-col size="auto">
-      <ion-card class="img m-0" [ngStyle]="{'background-image': 'url('+ anime.images.jpg.image_url +')'}">
-      </ion-card>
+    <ion-col size="3" class="p-0">
+      <div class="videoHolder m-0" [ngStyle]="{ 'background-image' : 'url('+animeData.images.jpg.image_url+')' }">
+
+      </div>
     </ion-col>
-    <ion-col class="">
-      <ion-row class="h-100">
-        <ion-col size="12">
-          <p style="line-height: normal;">
-            <ion-text class="tituloAnime">
-              {{anime.title}} 
-            </ion-text><br>
-          </p>
-        </ion-col>
-        <ion-col size="12" class="mt-auto contador text-right">
-          {{vistos}} / {{anime.episodes || '?'}}
-          <ion-progress-bar color="primary" [value]="vistos/anime.episodes"></ion-progress-bar>
-        </ion-col>
-      </ion-row>
-
-
-
+    <ion-col size="8" class=" p-2">
+      <div class="title f-13">
+        <ion-text class="bold">{{animeData.title}}</ion-text>
+      </div>
+      <div class="synopsis f-12">
+        <div class="line-clamp-5">
+          {{animeData.synopsis}}
+        </div>
+      </div>
     </ion-col>
   </ion-row>
+  <!-- <div class="frame_episode d-flex justify-content-center text-center align-items-center">
+    EPISODIO {{id}}
+  </div> -->
+  <!-- <ion-progress-bar *ngIf="viewedPercentage > 0" [value]="viewedPercentage" color="primary"></ion-progress-bar> -->
+
 </ion-card>

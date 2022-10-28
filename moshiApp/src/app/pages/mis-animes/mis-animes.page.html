@@ -1,37 +1,37 @@
 <ion-header>
   <ion-toolbar color="dark">
-    <ion-title>Mi lista</ion-title>
+    <ion-title>Mis listas</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/"></ion-back-button>
 
+      <!-- <ion-back-button defaultHref="/explora"></ion-back-button> -->
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
+
 <ion-header>
   <ion-toolbar color="dark">
     <ion-segment value="viendo">
-      <ion-segment-button value="viendo" (click)="tabActiva=1">
+      <ion-segment-button value="viendo" (click)="tabActiva='fav'">
         <ion-label>Favoritos</ion-label>
       </ion-segment-button>
-      <ion-segment-button value="planeado" (click)="tabActiva=6">
+      <!-- <ion-segment-button value="planeado" (click)="tabActiva=6">
         <ion-label>Por ver</ion-label>
-      </ion-segment-button>
+      </ion-segment-button> -->
     </ion-segment>
   </ion-toolbar>
 </ion-header>
 
 <ion-content color="dark">
-  <ion-grid>
-    <ion-row *ngIf="tabActiva==1">
-      <ion-col size="12" *ngFor="let anime of animesViendo">
-        <app-card-anime [malId]="anime.mal_id" [vistos]="anime.watched_episodes"></app-card-anime>
-      </ion-col>
-    </ion-row>
-    <ion-row *ngIf="tabActiva==6">
-      <ion-col size="12" *ngFor="let anime of animesPlaneados">
-        <app-card-anime [malId]="anime.mal_id" [vistos]="anime.watched_episodes"></app-card-anime>
-      </ion-col>
-    </ion-row>
-    <ion-row *ngIf="tabActiva==2">
-      <ion-col size="12" *ngFor="let anime of animesVistos">
-        <app-card-anime [malId]="anime.mal_id" [vistos]="anime.watched_episodes"></app-card-anime>
+  <!-- <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event, favAnimes)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher> -->
+
+  <ion-grid *ngIf="tabActiva=='fav'">
+
+    <ion-row>
+      <ion-col size="12" *ngFor="let anime of favAnimes">
+        <app-card-anime [animeData]="anime"></app-card-anime>
       </ion-col>
     </ion-row>
   </ion-grid>

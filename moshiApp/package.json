@@ -48,6 +48,7 @@
     "cordova-plugin-streaming-media": "^2.3.0",
     "cordova-plugin-video-player": "github:moust/cordova-plugin-videoplayer",
     "es6-promise-plugin": "^4.2.2",
+    "globalthis": "^1.0.3",
     "ionicons": "^6.0.3",
     "rxjs": "~6.6.0",
     "swiper": "^8.4.4",

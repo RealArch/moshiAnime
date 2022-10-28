@@ -43,7 +43,8 @@
         EPISODIOS
       </ion-col>
       <ion-col size="12" *ngFor="let ep of animeData.scrapedEpisodes.sub_esp; let i = index">
-        <app-video-item [id]="i+1" [episodeData]="ep" [animeData]="animeData" [viewedPercentage]="ep.viewedPercentage"></app-video-item>
+        <app-video-item [id]="i+1" [episodeData]="ep" [animeData]="animeData" [viewedPercentage]="ep.viewedPercentage">
+        </app-video-item>
       </ion-col>
     </ion-row>
     <ion-row>
@@ -89,3 +90,10 @@
 
   </ion-grid>
 </ion-content>
+<ion-fab vertical="bottom" horizontal="end" slot="fixed" *ngIf="!loading">
+  <ion-fab-button (click)="toggleFav()" [color]="isFav ? 'warning' : 'dark'">
+    <img *ngIf="!loadingUpdateFav && !isFav" class="icon-fav-off" src="/assets/icons/star.svg" alt="">
+    <img *ngIf="!loadingUpdateFav && isFav" class="icon-fav-on" src="/assets/icons/check_star.svg" alt="">
+    <ion-spinner *ngIf="loadingUpdateFav"></ion-spinner>
+  </ion-fab-button>
+</ion-fab>

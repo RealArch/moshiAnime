@@ -13,6 +13,7 @@ import { VgApiService } from '@videogular/ngx-videogular/core';
 
 // import { VideoPlayer } from '@ionic-native/video-player/ngx';
 import { combineLatest } from 'rxjs';
+import { PopupsService } from 'src/app/services/popups/popups.service';
 
 @Component({
   selector: 'app-pagina-anime',
@@ -61,7 +62,8 @@ export class PaginaAnimePage implements OnInit {
   animeData: import("@angular/fire/firestore").DocumentData;
   userData: import("@angular/fire/firestore").DocumentData;
   queryAnimeTitle: any;
-
+  loadingUpdateFav: boolean;
+  isFav = false
   constructor(
     private androidFullScreen: AndroidFullScreen,
     private activatedRoute: ActivatedRoute,
@@ -73,6 +75,7 @@ export class PaginaAnimePage implements OnInit {
     private navController: NavController,
     private alertController: AlertController,
     private toastController: ToastController,
+    private apiPopups: PopupsService
     // private videoPlayer: VideoPlayer
   ) { }
 
@@ -80,9 +83,9 @@ export class PaginaAnimePage implements OnInit {
     //2 finalizados
     //6 plan to watch
     //1 watching 
-    this.uid
     this.loading = true
     var user = getAuth().currentUser
+    console.log(user)
     this.malId = this.activatedRoute.snapshot.paramMap.get('id')
     this.queryAnimeTitle = this.activatedRoute.snapshot.queryParamMap.get('title')
     console.log(this.queryAnimeTitle)
@@ -96,6 +99,9 @@ export class PaginaAnimePage implements OnInit {
         this.animeData = animeData
         //userData
         this.userData = userData
+        //Check if its fav
+        this.isFav = this.api.isFavLocal(this.userData.favAnimes, this.malId)
+        //
         this.addTimeToEpisode(this.malId, this.userData.viewedAnimes, this.animeData)
         this.loading = false
       })
@@ -108,15 +114,33 @@ export class PaginaAnimePage implements OnInit {
     }
 
   }
+
+  toggleFav() {
+    if (this.loadingUpdateFav)
+      return
+    this.loadingUpdateFav = true
+    this.api.toggleFav(this.malId)
+      .then(() => {
+        console.log('volvi')
+      }).catch(err => {
+        console.log(err)
+        this.apiPopups.toast('danger', 'Ocurrió un problema a modificar los favoritos.')
+      }).finally(() => {
+        this.loadingUpdateFav = false
+      })
+
+
+
+  }
   addTimeToEpisode(animeId, viewedAnimes, animeData) {
     for (let j = 0; j < animeData.scrapedEpisodes.sub_esp.length; j++) {
-      animeData.scrapedEpisodes.sub_esp[j].viewedPercentage = this.getTimeFromId(animeId, j+1, viewedAnimes)
+      animeData.scrapedEpisodes.sub_esp[j].viewedPercentage = this.getTimeFromId(animeId, j + 1, viewedAnimes)
     }
   }
   getTimeFromId(animeId, episodeId, viewedAnimes) {
-  //  console.log(episodeId)
-   console.log(viewedAnimes)
-  //  console.log(animeId)
+    //  console.log(episodeId)
+    console.log(viewedAnimes)
+    //  console.log(animeId)
     for (let i = 0; i < viewedAnimes.length; i++) {
       //leer todos lo animes vistos
       //si coincide con este animeId, comparar

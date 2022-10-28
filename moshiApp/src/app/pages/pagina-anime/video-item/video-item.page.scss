@@ -23,13 +23,7 @@
     text-overflow: ellipsis;
     overflow: hidden;
 }
-.line-clamp{
-    display: -webkit-box;
-    max-width: 200px;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
+
 .synopsis{
     color: rgb(142, 142, 142);
 }

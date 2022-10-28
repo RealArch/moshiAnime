@@ -7,29 +7,13 @@ import { ApiService } from 'src/app/services/api.service';
   styleUrls: ['./card-anime.page.scss'],
 })
 export class CardAnimePage implements OnInit {
-  @Input() malId:string
-  @Input() vistos:number
-  anime;
-  loading: boolean;
+  @Input('animeData') animeData
+ 
   constructor(
-    private api:ApiService
   ) { }
 
   ngOnInit() {
-    this.loading=true
-    this.api.getAnimeByMalId(this.malId)
-    .subscribe((data:any)=>{
-      console.log(data)
-      this.anime=data.data
-      this.loading=false
-
-    },err=>{
-      console.log(err)
-      this.loading=false
-      console.log('tuve un problema al cargar')
-      this.ngOnInit()
-      //toast error
-    })
+    console.log(this.animeData)
   }
 
 }

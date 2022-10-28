@@ -5,7 +5,7 @@ var rp = require('request-promise');
 const app = express();
 //cron.schedule("0 0 0,9,12,2,4,8,10 * * *", async function () {
 
-cron.schedule("0 0 0,9,14,18,21 * * *", async function () {
+cron.schedule("0 0 12,14,18,21 * * *", async function () {
   console.log("---------------------");
   console.log("Ejecutando");
   var options = {
@@ -35,6 +35,16 @@ cron.schedule("0 0 0,9,14,18,21 * * *", async function () {
 //SEGUNDO DIA
 //0 = 0
 //9 = 0
+//2 = 9
+//6 = 0
+//9 = 0
+//TERCER DIA
+//0 = 0
+//9 = 0
+//12 =0
+//14 = 0
+//18 = 1
+//21 = 0
 
 // app.get('/', async(req,res)=>{
 //   console.log("---------------------");

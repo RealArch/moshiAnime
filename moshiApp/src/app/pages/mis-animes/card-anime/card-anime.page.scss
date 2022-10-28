@@ -1,14 +1,16 @@
-.img{
-    width: 75px;
-    height: 100px;
+.videoHolder {
+    background-color: var(--ion-color-dark-shade);
+    height: 120px;
     background-position: center;
     background-size: cover;
 }
-.tituloAnime{
-    font-size: 16px;
-    font-weight: 500;
+
+.title{
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
-.contador{
-    font-size: 12px;
-    font-weight: 600;
+
+.synopsis{
+    color: rgb(142, 142, 142);
 }

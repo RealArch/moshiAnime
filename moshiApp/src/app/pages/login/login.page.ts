@@ -30,16 +30,24 @@ export class LoginPage implements OnInit {
   google() {
     this.loading = true
     if (Capacitor.getPlatform() == "android") {
+      console.log('entre a login android google')
       this.auth.loginGoogleAndroid()
         .then((data: any) => {
+          console.log('entre a peticion')
+
           console.log(data)
           this.auth.getUser(data.user.uid)
             .then(user => {
-              if (user.exists) {
+              console.log('encontre datos de user')
+              if (user.exists()) {
+                console.log('el usuario existia')
+
                 this.rouetr.navigate(['/'])
                 this.loading = false
 
               } else {
+                console.log('el no usuario existia')
+
                 //Crea el usuario
                 var datos = {
                   uid: data.user.uid,
@@ -50,6 +58,7 @@ export class LoginPage implements OnInit {
                 }
                 this.auth.crearUsuarioFirestore(datos)
                   .then(data => {
+                    console.log('cree el usuario')
                     this.loading = false
 
                     this.rouetr.navigate(['/'])
@@ -63,6 +72,9 @@ export class LoginPage implements OnInit {
                   })
               }
             }).catch(err => {
+              console.log('falle al buscar datos')
+              console.log(err)
+              console.log(12)
               //desloguea
               this.loading = false
 
@@ -74,6 +86,8 @@ export class LoginPage implements OnInit {
         }).catch(err => {
           //mostrar error 
           //muestra error
+          console.log(11)
+          console.log(err)
           this.loading = false
 
           this.toast('Ha ocurrido un problema al iniciar sesión con Google')

@@ -18,6 +18,54 @@ export class ApiService {
     private _firestore: Firestore
 
   ) { }
+  getAnimesByIdAlgolia(ids) {
+    // if(ids == undefined || ids.length == 0) return []
+    return animesIndex.getObjects(ids)
+  }
+  isFavLocal(favAnimes, animeId) {
+    if (favAnimes == undefined) return false
+    for (let i = 0; i < favAnimes.length; i++) {
+      if (favAnimes[i].animeId == animeId) {
+        return true
+      }
+    }
+    return false
+  }
+  toggleFav(animeId) {
+    var currenUid = getAuth().currentUser.uid
+    console.log(currenUid)
+    var ref = doc(getFirestore(), 'userPublic', currenUid)
+    return runTransaction(getFirestore(), async (transaction) => {
+      const user = await transaction.get(ref);
+      var anime = {
+        date: Date.now(),
+        animeId: animeId
+      }
+      var favAnimes = []
+      //si no existe favoritos, agregar y finalizar
+      if (!user.data().favAnimes) {
+        favAnimes.push(anime)
+        return transaction.set(ref, {
+          favAnimes: favAnimes
+        }, { merge: true })
+      }
+      favAnimes = user.data().favAnimes
+      //buscar favoritos y si anime existe en favoritos, eliminar
+      for (let i = 0; i < favAnimes.length; i++) {
+        if (favAnimes[i].animeId == animeId) {
+          favAnimes.splice(i, 1)
+          return transaction.set(ref, {
+            favAnimes: favAnimes
+          }, { merge: true })
+        }
+      }
+      //si no existe en fav, hacer añadir
+      favAnimes.push(anime)
+      return transaction.set(ref, {
+        favAnimes: favAnimes
+      }, { merge: true })
+    })
+  }
   searchTimeAnimeEpisode(episodeId, animeId, viewedAnimes) {
     console.log(episodeId)
     for (let i = 0; i < viewedAnimes.length; i++) {
@@ -38,7 +86,8 @@ export class ApiService {
   }
   getPublicUserData(uid) {
     //get data
-    var ref = doc(getFirestore(), 'userPublic', uid)
+    var userUid = getAuth().currentUser.uid
+    var ref = doc(getFirestore(), 'userPublic', userUid)
     return docData(ref, { idField: uid })
   }
   updateAnime(userId, time, animeId, episodeId, duration) {
@@ -151,11 +200,11 @@ export class ApiService {
       animeId: animeId,
       episode: episode
     }
-    return this.http.post(`${environment.api}api/getAnimeVideo`, data) 
+    return this.http.post(`${environment.api}api/getAnimeVideo`, data)
   }
   getSeasonAnimes(season, year) {
     return animesIndex.search('', {
-      numericFilters:`totalScraped_sub_esp > 0`,
+      numericFilters: `totalScraped_sub_esp > 0`,
       filters: `season:${season} AND year:${year}`
     })
   }

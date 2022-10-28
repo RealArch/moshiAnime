@@ -158,7 +158,7 @@ async function executeScalp(season, year) {
             has_next_page = false
         }
     }
-    seasonalAnimes.splice(1)
+    //seasonalAnimes.splice(1)
     const batch = db.batch();
     //Preparar data para la DB
     var errors = []
@@ -422,6 +422,7 @@ exports.userCreated = functions.firestore
     .onCreate(async (snap, context) => {
         //crear tambien el userPublic
         db.collection('userPublic').doc(snap.id).set({
-            viewedAnimes: []
+            viewedAnimes: [],
+            favAnimes: []
         })
     })
