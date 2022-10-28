@@ -1,24 +1,58 @@
-.cardAnime{
+.cardAnime {}
 
-}
-.img{
-    height: 160px;
+.img {
+    width: 100%;
     background-size: cover;
-    background-position:center;
+    background-position: center;
 }
-.tituloAnime{
+
+.tituloAnime {
     font-size: 12px;
     font-weight: 600;
     line-height: 14px;
     height: 25px;
     overflow: hidden;
     text-align: left;
+    white-space: initial;
 }
-.no-shadow{
-    box-shadow: none!important;
+
+.no-shadow {
+    box-shadow: none !important;
 }
-.tipoAnime{
+
+.tipoAnime {
     font-size: 10px;
     font-weight: 600;
     text-align: left;
+}
+
+ion-skeleton-text {
+    // background-color: rgb(195, 195, 195);
+    --border-radius: 5px;
+    --background: rgba(249, 5, 5, 0.065);
+    --background-rgb: 195, 195, 195;
+}
+
+.horizontal-scroll-wrapper {
+    overflow-x: scroll;
+    overflow-y: hidden;
+    white-space: nowrap;
+
+}
+
+.horizontal-scroll-wrapper>div {
+    display: inline-block;
+}
+
+.animeBox {
+    width: 130px;
+    margin-right: 10px;
+    overflow-x: initial;
+
+    .img {
+        width: 100%;
+        height: 230px;
+        background-size: cover;
+        background-position: center;
+    }
 }
