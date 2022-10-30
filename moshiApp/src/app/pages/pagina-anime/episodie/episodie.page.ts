@@ -44,19 +44,21 @@ export class EpisodiePage implements OnInit {
     this.episodeId = this.activatedRoute.snapshot.paramMap.get('episodeId')
     this.auth.isLogged()
       .subscribe(user => {
-        this.combineLatestSub = combineLatest([
-          this.api.getAnimeVideo(this.animeId, this.episodeId),
-          this.api.getPublicUserData(user.uid)
+        this.subscriptions.push(
+          combineLatest([
+            this.api.getAnimeVideo(this.animeId, this.episodeId),
+            this.api.getPublicUserData(user.uid)
 
-        ]).subscribe(([animeVideo, publicUserData]) => {
-          this.video = animeVideo['url']
-          //publicUserData
-          this.publicUserData = publicUserData
-          //Get lastTime in seconds
-          this.lastTime = this.api.searchTimeAnimeEpisode(this.episodeId, this.animeId, this.publicUserData.viewedAnimes)
+          ]).subscribe(([animeVideo, publicUserData]) => {
+            this.video = animeVideo['url']
+            //publicUserData
+            this.publicUserData = publicUserData
+            //Get lastTime in seconds
+            this.lastTime = this.api.searchTimeAnimeEpisode(this.episodeId, this.animeId, this.publicUserData.viewedAnimes)
 
-          this.loadingVideo = false
-        })
+            this.loadingVideo = false
+          })
+        )
       })
 
 

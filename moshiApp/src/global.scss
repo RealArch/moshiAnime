@@ -120,3 +120,9 @@ ion-card{
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+ion-skeleton-text {
+  // background-color: rgb(195, 195, 195);
+  --border-radius: 5px;
+  --background: rgba(249, 5, 5, 0.065);
+  --background-rgb: 195, 195, 195;
+}

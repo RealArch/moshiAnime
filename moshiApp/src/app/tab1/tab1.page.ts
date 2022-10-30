@@ -19,9 +19,9 @@ export class Tab1Page {
       enabled: true,
       momentumRatio: 0.6,
       momentumVelocityRatio: 0.5,
-      momentumBounce:false,
-      minimumVelocity:0,
-      sticky:true
+      momentumBounce: false,
+      minimumVelocity: 0,
+      sticky: true
     },
     lazy: true
 
@@ -34,25 +34,35 @@ export class Tab1Page {
   loadingAiring: boolean;
   loading: boolean;
   season: any;
+  genresRomantic;
   constructor(
     private api: ApiService,
   ) {
     this.loading = true
+    this.loadData(null)
 
-
+  }
+  loadData(ev) {
+    //romance  22, comedia 4
     combineLatest([
-      this.api.getSeasonAnimes('fall', 2022),
-    ]).subscribe(([season]) => {//tv,upcoming,airing
+      this.api.getSeasonAnimes('fall', 2022, ev),
+      this.api.getAnimesByCat([22, 4],ev)
+    ]).subscribe(([season, genresRomantic]) => {//tv,upcoming,airing
       this.season = season.hits
-      console.log(this.season)
+      //Romantic
+      this.genresRomantic = genresRomantic.hits
+      console.log(this.genresRomantic)
+      if (ev != null) {
+        ev.target.complete();
+      }
       this.loading = false
     })
   }
-
   onSwiper(swiper) {
   }
   onSlideChange(ev) {
   }
+
 
 
 

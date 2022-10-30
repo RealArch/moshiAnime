@@ -1,0 +1,80 @@
+<ion-header>
+  <ion-toolbar color="dark">
+    <ion-title>{{year}}  {{season | titlecase}}</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/"></ion-back-button>
+
+      <!-- <ion-back-button defaultHref="/explora"></ion-back-button> -->
+    </ion-buttons>
+    <ion-buttons slot="end">
+      <ion-button (click)="openPicker()">
+        <ion-icon slot="icon-only" name="calendar"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content color="dark">
+  <ion-grid *ngIf="!loading">
+    <ion-row>
+      <ion-col size="6" *ngFor="let anime of animes">
+        <app-item-vertical1 [anime]="anime"></app-item-vertical1>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  <ion-grid *ngIf="loading">
+    <ion-row>
+      <ion-col size="12" class="pb-0">
+        <ion-skeleton-text [animated]="true" style="height:30px"></ion-skeleton-text>
+      </ion-col>
+      <ion-col size="4" class="pt-0">
+        <div style="height:180px;">
+          <ion-skeleton-text [animated]="true"></ion-skeleton-text>
+        </div>
+        <ion-skeleton-text [animated]="true" style="height:30px; margin-top:10px"></ion-skeleton-text>
+
+      </ion-col>
+      <ion-col size="4" class="pt-0">
+        <div style="height:180px;">
+          <ion-skeleton-text [animated]="true"></ion-skeleton-text>
+        </div>
+        <ion-skeleton-text [animated]="true" style="height:30px; margin-top:10px"></ion-skeleton-text>
+
+      </ion-col>
+      <ion-col size="4" class="pt-0">
+        <div style="height:180px;">
+          <ion-skeleton-text [animated]="true"></ion-skeleton-text>
+        </div>
+        <ion-skeleton-text [animated]="true" style="height:30px; margin-top:10px"></ion-skeleton-text>
+
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="12" class="pb-0">
+        <ion-skeleton-text [animated]="true" style="height:30px"></ion-skeleton-text>
+      </ion-col>
+      <ion-col size="4" class="pt-0">
+        <div style="height:180px;">
+          <ion-skeleton-text [animated]="true"></ion-skeleton-text>
+        </div>
+        <ion-skeleton-text [animated]="true" style="height:30px; margin-top:10px"></ion-skeleton-text>
+
+      </ion-col>
+      <ion-col size="4" class="pt-0">
+        <div style="height:180px;">
+          <ion-skeleton-text [animated]="true"></ion-skeleton-text>
+        </div>
+        <ion-skeleton-text [animated]="true" style="height:30px; margin-top:10px"></ion-skeleton-text>
+
+      </ion-col>
+      <ion-col size="4" class="pt-0">
+        <div style="height:180px;">
+          <ion-skeleton-text [animated]="true"></ion-skeleton-text>
+        </div>
+        <ion-skeleton-text [animated]="true" style="height:30px; margin-top:10px"></ion-skeleton-text>
+
+      </ion-col>
+    </ion-row>
+
+  </ion-grid>
+</ion-content>

@@ -5,7 +5,7 @@ var rp = require('request-promise');
 const app = express();
 //cron.schedule("0 0 0,9,12,2,4,8,10 * * *", async function () {
 
-cron.schedule("0 0 12,14,18,21 * * *", async function () {
+cron.schedule("0 0 0,12,14,17,21 * * *", async function () {
   console.log("---------------------");
   console.log("Ejecutando");
   var options = {
@@ -13,7 +13,9 @@ cron.schedule("0 0 12,14,18,21 * * *", async function () {
     uri: 'http://localhost:5001/moshianimeapp/us-central1/api/getSetSeasonAnimes',
     body: {
       season: 'fall',
-      year: 2022
+      year: 2022,
+      actualSeason: true,
+      dateNowSus: null
     },
     json: true // Automatically stringifies the body to JSON
   };

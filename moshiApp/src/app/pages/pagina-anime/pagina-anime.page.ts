@@ -12,7 +12,7 @@ import { VgApiService } from '@videogular/ngx-videogular/core';
 
 
 // import { VideoPlayer } from '@ionic-native/video-player/ngx';
-import { combineLatest } from 'rxjs';
+import { combineLatest, Subscription } from 'rxjs';
 import { PopupsService } from 'src/app/services/popups/popups.service';
 
 @Component({
@@ -64,6 +64,7 @@ export class PaginaAnimePage implements OnInit {
   queryAnimeTitle: any;
   loadingUpdateFav: boolean;
   isFav = false
+  subscriptions: Subscription[] = [];
   constructor(
     private androidFullScreen: AndroidFullScreen,
     private activatedRoute: ActivatedRoute,
@@ -78,7 +79,9 @@ export class PaginaAnimePage implements OnInit {
     private apiPopups: PopupsService
     // private videoPlayer: VideoPlayer
   ) { }
-
+  ngOnDestroy() {
+    this.subscriptions.forEach(s => s.unsubscribe());
+  }
   ngOnInit() {
     //2 finalizados
     //6 plan to watch
@@ -90,21 +93,24 @@ export class PaginaAnimePage implements OnInit {
     this.queryAnimeTitle = this.activatedRoute.snapshot.queryParamMap.get('title')
     console.log(this.queryAnimeTitle)
     if (user != null) {
-      combineLatest([
-        this.api.getAnimeData(this.malId),
-        this.api.getPublicUserData(user.uid)
-      ]).subscribe(([animeData, userData]) => {
-        this.uid = user.uid
-        //animeData
-        this.animeData = animeData
-        //userData
-        this.userData = userData
-        //Check if its fav
-        this.isFav = this.api.isFavLocal(this.userData.favAnimes, this.malId)
-        //
-        this.addTimeToEpisode(this.malId, this.userData.viewedAnimes, this.animeData)
-        this.loading = false
-      })
+      this.subscriptions.push(
+        combineLatest([
+          this.api.getAnimeData(this.malId),
+          this.api.getPublicUserData(user.uid)
+        ]).subscribe(([animeData, userData]) => {
+          this.uid = user.uid
+          //animeData
+          this.animeData = animeData
+          //userData
+          this.userData = userData
+          //Check if its fav
+          this.isFav = this.api.isFavLocal(this.userData.favAnimes, this.malId)
+          //
+          this.addTimeToEpisode(this.malId, this.userData.viewedAnimes, this.animeData)
+          this.loading = false
+        })
+      )
+
       this.api.getStaffByMalId(this.malId)
         .subscribe(staffMal => {
           //STAFF

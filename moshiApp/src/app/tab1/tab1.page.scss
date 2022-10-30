@@ -7,10 +7,10 @@
 }
 
 .tituloAnime {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
     line-height: 14px;
-    height: 25px;
+    height: 28px;
     overflow: hidden;
     text-align: left;
     white-space: initial;
@@ -26,12 +26,7 @@
     text-align: left;
 }
 
-ion-skeleton-text {
-    // background-color: rgb(195, 195, 195);
-    --border-radius: 5px;
-    --background: rgba(249, 5, 5, 0.065);
-    --background-rgb: 195, 195, 195;
-}
+
 
 .horizontal-scroll-wrapper {
     overflow-x: scroll;
@@ -45,14 +40,15 @@ ion-skeleton-text {
 }
 
 .animeBox {
-    width: 130px;
+    width: 120px;
     margin-right: 10px;
     overflow-x: initial;
-
-    .img {
-        width: 100%;
-        height: 230px;
-        background-size: cover;
-        background-position: center;
-    }
+    background-color: var(--ion-color-medium);
+    .content-animeBox{}
+}
+.img {
+    width: 100%;
+    height: 180px;
+    background-size: cover;
+    background-position: center;
 }

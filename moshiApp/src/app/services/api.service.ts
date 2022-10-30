@@ -4,6 +4,7 @@ import { environment } from './../../environments/environment'
 import { Auth, authState, getAuth, user } from '@angular/fire/auth';
 import { collectionSnapshots, doc, docData, Firestore, getFirestore, runTransaction, setDoc, updateDoc } from '@angular/fire/firestore';
 import algoliasearch from "algoliasearch"
+import { promise } from 'protractor';
 const client = algoliasearch(environment.algolia.appId, environment.algolia.searchKey)
 const animesIndex = client.initIndex(environment.algolia.indexes.animes);
 
@@ -11,6 +12,7 @@ const animesIndex = client.initIndex(environment.algolia.indexes.animes);
   providedIn: 'root'
 })
 export class ApiService {
+  publicConfigs: import("@angular/fire/firestore").DocumentData;
 
   constructor(
     private http: HttpClient,
@@ -90,6 +92,23 @@ export class ApiService {
     var ref = doc(getFirestore(), 'userPublic', userUid)
     return docData(ref, { idField: uid })
   }
+  //CONFIGS
+  async initPublicConfigs() {
+     return new Promise((resolve, reject) => { 
+        this.getPublicConfigs()
+          .subscribe(publicConfigs => {
+            this.publicConfigs = publicConfigs
+            resolve(true)
+          }) 
+    });
+
+  }
+  getPublicConfigs() {
+    var ref = doc(getFirestore(), 'statitics', 'publicConfigs')
+    return docData(ref)
+
+  }
+  //
   updateAnime(userId, time, animeId, episodeId, duration) {
     console.log('duracion: ' + episodeId)
     episodeId = parseInt(episodeId)
@@ -202,7 +221,22 @@ export class ApiService {
     }
     return this.http.post(`${environment.api}api/getAnimeVideo`, data)
   }
-  getSeasonAnimes(season, year) {
+  getAnimesByCat(cats: any[], ev) {
+    if (ev != null) {
+      client.clearCache()
+    }
+    var filters = []
+    for (const cat of cats) {
+      filters.push(`categories:${cat}`)
+    }
+    return animesIndex.search('', {
+      facetFilters: filters
+    })
+  }
+  getSeasonAnimes(season, year, ev) {
+    if (ev != null) {
+      client.clearCache()
+    }
     return animesIndex.search('', {
       numericFilters: `totalScraped_sub_esp > 0`,
       filters: `season:${season} AND year:${year}`

@@ -20,6 +20,11 @@ const routes: Routes = [
         loadChildren: () => import('../pages/ajustes/ajustes.module').then(m => m.AjustesPageModule)
       },
       {
+        path: 'seasons',
+        loadChildren: () => import('../pages/seasons/seasons.module').then(m => m.SeasonsPageModule),
+    
+      },
+      {
         path: '',
         redirectTo: '/explora',
         pathMatch: 'full'
