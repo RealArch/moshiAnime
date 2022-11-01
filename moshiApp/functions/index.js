@@ -387,7 +387,7 @@ async function executeScalp(season, year, actualSeason, dateNowSus) {
             metaDataErrors.push({
                 id: anime.mal_id,
                 name: titleFormated,
-                metaDataErrors: admin.firestore.FieldValue.arrayUnion(animeMetadataErrors)
+                episodes: animeMetadataErrors
             })
         }
 

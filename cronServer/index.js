@@ -5,7 +5,7 @@ var rp = require('request-promise');
 const app = express();
 //cron.schedule("0 0 0,9,12,2,4,8,10 * * *", async function () {
 
-cron.schedule("0 0 0,12,14,17,21 * * *", async function () {
+cron.schedule("0 20 0,12,14,15,17,21 * * *", async function () {
   console.log("---------------------");
   console.log("Ejecutando");
   var options = {

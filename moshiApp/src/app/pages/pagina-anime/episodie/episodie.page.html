@@ -8,10 +8,17 @@
   </ion-toolbar>
 </ion-header>
 <ion-content color="medium">
-  <div  class="video_box d-flex align-items-center justify-content-center">
+  <Button is="google-cast-button">Cast</Button>
+
+  <div (click)="requestCast()">
+    ---
+    <google-cast-launcher></google-cast-launcher>
+    ---
+  </div>
+  <div class="video_box d-flex align-items-center justify-content-center">
     <ion-spinner color="light" *ngIf="loadingVideo"></ion-spinner>
-    <vg-player *ngIf="!loadingVideo" (onPlayerReady)="onPlayerReady($event)" >
-      <vg-overlay-play></vg-overlay-play>
+    <vg-player id="player" *ngIf="!loadingVideo" (onPlayerReady)="onPlayerReady($event)">
+      <!-- <vg-overlay-play></vg-overlay-play> -->
       <vg-buffering></vg-buffering>
       <vg-scrub-bar>
         <vg-scrub-bar-current-time></vg-scrub-bar-current-time>
@@ -26,13 +33,22 @@
         <!-- <vg-time-display vgProperty="total" vgFormat="mm:ss"></vg-time-display> -->
         <!-- <vg-track-selector></vg-track-selector> -->
         <vg-mute></vg-mute>
-        <vg-volume></vg-volume>
+        <google-cast-launcher></google-cast-launcher>
+        <!-- <vg-volume></vg-volume> -->
         <vg-fullscreen></vg-fullscreen>
       </vg-controls>
       <video autoplay [vgMedia]="$any(media)" #media id="singleVideo" preload="auto" crossorigin>
         <source [src]="video" type="video/mp4">
       </video>
     </vg-player>
+
+    <div *ngIf="back" style="width: 50%; height: 100%; position: absolute; left: 0px; pointer-events: none">
+      <ion-icon name="play-back"></ion-icon>
+    </div>
+    <div *ngIf="forward" style=" width: 50%; height: 100%; position: absolute; right: 0px; pointer-events: none">
+      <ion-icon name="play-forward"></ion-icon>
+    </div>
+
   </div>
   <div class="p-2">
     seccion en contruccion
