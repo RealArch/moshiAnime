@@ -8,17 +8,18 @@
   </ion-toolbar>
 </ion-header>
 <ion-content color="medium">
-  <Button is="google-cast-button">Cast</Button>
+  
 
-  <div (click)="requestCast()">
+  <!-- <Button is="google-cast-button">Cast</Button> -->
+
+  <!-- <div (click)="requestCast()">
     ---
     <google-cast-launcher></google-cast-launcher>
     ---
-  </div>
+  </div> -->
   <div class="video_box d-flex align-items-center justify-content-center">
     <ion-spinner color="light" *ngIf="loadingVideo"></ion-spinner>
     <vg-player id="player" *ngIf="!loadingVideo" (onPlayerReady)="onPlayerReady($event)">
-      <!-- <vg-overlay-play></vg-overlay-play> -->
       <vg-buffering></vg-buffering>
       <vg-scrub-bar>
         <vg-scrub-bar-current-time></vg-scrub-bar-current-time>
@@ -33,7 +34,7 @@
         <!-- <vg-time-display vgProperty="total" vgFormat="mm:ss"></vg-time-display> -->
         <!-- <vg-track-selector></vg-track-selector> -->
         <vg-mute></vg-mute>
-        <google-cast-launcher></google-cast-launcher>
+        <!-- <google-cast-launcher></google-cast-launcher> -->
         <!-- <vg-volume></vg-volume> -->
         <vg-fullscreen></vg-fullscreen>
       </vg-controls>

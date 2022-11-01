@@ -7,8 +7,8 @@ import { VgApiService } from '@videogular/ngx-videogular/core';
 import { combineLatest, Subscription } from 'rxjs';
 import { AuthService } from 'src/app/services/authentication/auth.service';
 import { createGesture, Gesture, GestureController } from '@ionic/angular';
-declare var cast
-declare var chrome
+// declare var cast
+// declare var chrome
 @Component({
   selector: 'app-episodie',
   templateUrl: './episodie.page.html',
@@ -50,123 +50,50 @@ export class EpisodiePage implements OnInit {
     private screenOrientation: ScreenOrientation,
     private auth: AuthService
   ) {
-    this.initCast()
 
   }
-  test() {
-    console.log('okok')
 
-  }
-  ngAfterViewInit() {
-
-
-    //config cast
-    console.log(chrome)
-    console.log('cargué todo')
-    //Gesture
-    this.player = document.getElementById('player')
-    const gesture = this.gestureCtrl.create({
-      gestureName: 'doubleTap',
-      el: this.player,
-      threshold: 0,
-      onStart: (t) => { this.onStart(t); }
-    });
-    let resizeObserver = new ResizeObserver((e) => {
-      this.playerWidth = e[0].contentRect.width
-      this.playerHeight = e[0].contentRect.height
-    });
-    resizeObserver.observe(this.player);
-    gesture.enable();
-  }
-  initCast() {
-    // console.log(window['__onGCastApiAvailable'])
-    cast.framework.CastContext.getInstance().setOptions({
-      receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
-      autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
-    });
-    document.createElement("google-cast-launcher");
-
-    // this.initializeCastApi = function () {
-    //   console.log('okokookokkok')
-    //     setTimeout(() => {
-    //       console.log('inicialice cast')
-    //       cast.framework.CastContext.getInstance().setOptions({
-    //         receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
-    //         autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
-    //       });
-    //     }, 0)
-
-
-    // };
-    // window['__onGCastApiAvailable'] = function (isAvailable) {
-    //   console.log(2)
-    //   if (isAvailable) {
-    //     this.initializeCastApi = function () {
-    //       if (isAvailable) {
-    //         setTimeout(() => {
-    //           console.log('inicialice cast')
-    //           cast.framework.CastContext.getInstance().setOptions({
-    //             receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
-    //             autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
-    //           });
-    //         }, 0)
-    //       }
-
-    //     };
-    //   }
-    // };
-  }
-  requestCast() {
-    console.log('aja')
-    var castSession = cast.framework.CastContext.getInstance().getCurrentSession();
-
-    var mediaInfo = new chrome.cast.media.MediaInfo(this.video, 'video/mp4');
-    var request = new chrome.cast.media.LoadRequest(mediaInfo);
-    console.log(castSession)
-    // castSession.loadMedia(request).then(
-    //   function () { console.log('Load succeed'); },
-    //   function (errorCode) { console.log('Error code: ' + errorCode); });
-  }
   async ngOnInit() {
-    ///INICIALIZAR GESTOS
-
-
-    ///
     this.currentTime = this.lastTime
     this.loadingVideo = true
     this.animeId = this.activatedRoute.snapshot.paramMap.get('id');
     this.episodeId = this.activatedRoute.snapshot.paramMap.get('episodeId')
-    // this.auth.isLogged()
-    //   .subscribe(user => {
-    //     this.subscriptions.push(
-    //       combineLatest([
-    //         this.api.getAnimeVideo(this.animeId, this.episodeId),
-    //         this.api.getPublicUserData(user.uid)
+    this.auth.isLogged()
+      .subscribe(user => {
+        this.subscriptions.push(
+          combineLatest([
+            this.api.getAnimeVideo(this.animeId, this.episodeId),
+            this.api.getPublicUserData(user.uid)
 
-    //       ]).subscribe(([animeVideo, publicUserData]) => {
-    //         this.video = animeVideo['url']
-    //         //publicUserData
-    //         this.publicUserData = publicUserData
-    //         //Get lastTime in seconds
-    //         this.lastTime = this.api.searchTimeAnimeEpisode(this.episodeId, this.animeId, this.publicUserData.viewedAnimes)
+          ]).subscribe(async ([animeVideo, publicUserData]) => {
+            this.video = animeVideo['url']
+            //publicUserData
+            this.publicUserData = publicUserData
+            //Get lastTime in seconds
+            this.lastTime = this.api.searchTimeAnimeEpisode(this.episodeId, this.animeId, this.publicUserData.viewedAnimes)
+            this.loadingVideo = false
 
-    //         this.loadingVideo = false
-    //       })
-    //     )
-    //   })
+            setTimeout(() => {
+              this.player = document.getElementById('player')
+              const gesture = this.gestureCtrl.create({
+                gestureName: 'doubleTap',
+                el: this.player,
+                threshold: 0,
+                onStart: (t) => { this.onStart(t); }
+              });
+              let resizeObserver = new ResizeObserver((e) => {
+                this.playerWidth = e[0].contentRect.width
+                this.playerHeight = e[0].contentRect.height
+              });
+              resizeObserver.observe(this.player);
+              gesture.enable();
+            }, 100)
 
-
-    this.video = 'assets/video.mp4'
-    this.loadingVideo = false
-
-    //Guardar track en DB
-    //Cada 20 segundos si esta en play
-    //al salir de la pagina
-    //getDuration time
-
-
-
-
+          })
+        )
+      })
+    // this.video = 'assets/video.mp4'
+    // this.loadingVideo = false
   }
   private onStart(t) {
     const now = Date.now();
