@@ -38,6 +38,7 @@ export class LoginPage implements OnInit {
           console.log(data)
           this.auth.getUser(data.user.uid)
             .then(user => {
+              console.log(user.data())
               console.log('encontre datos de user')
               if (user.exists()) {
                 console.log('el usuario existia')
@@ -49,13 +50,33 @@ export class LoginPage implements OnInit {
                 console.log('el no usuario existia')
 
                 //Crea el usuario
+                // var datos = {
+                //   uid: data.user.uid,
+                //   email: data.user.email,
+                //   nombre: data._tokenResponse.firstName,
+                //   apellido: data._tokenResponse.lastName,
+                //   foto: data._tokenResponse.photoUrl,
+                // }
                 var datos = {
                   uid: data.user.uid,
                   email: data.user.email,
-                  nombre: data._tokenResponse.firstName,
-                  apellido: data._tokenResponse.lastName,
-                  foto: data._tokenResponse.photoUrl,
+                  nombre: '',
+                  apellido: '',
+                  foto: '',
                 }
+                console.log(datos)
+                if (data._tokenResponse.firstName != undefined) {
+                  datos.nombre = data._tokenResponse.firstName
+                }
+                if (data._tokenResponse.lastName != undefined) {
+                  console.log(data._tokenResponse.lastName)
+                  datos.apellido = data._tokenResponse.lastName
+                }
+                if (data._tokenResponse.photoUrl != undefined) {
+                  datos.foto = data._tokenResponse.photoUrl
+                }
+                console.log(datos)
+
                 this.auth.crearUsuarioFirestore(datos)
                   .then(data => {
                     console.log('cree el usuario')
@@ -66,7 +87,9 @@ export class LoginPage implements OnInit {
                     this.loading = false
 
                     //desloguea
-                    this.auth.logOut()
+
+                    // this.auth.logOut()
+
                     //muestra error
                     this.toast('Ha ocurrido un problema al iniciar sesión')
                   })

@@ -146,7 +146,7 @@ app.post('/getSetSeasonAnimes', async (req, res) => {
     var year = req.body.year;
     var actualSeason = req.body.actualSeason
     var dateNowSus = req.body.dateNowSus
-    executeScalp(season, year, actualSeason, dateNowSus)
+    await executeScalp(season, year, actualSeason, dateNowSus)
     return res.json({ success: 'Solicitud enviada. Esta solicitud puede tardar hasta 60 minutos.' })
 })
 //funcitons
@@ -476,7 +476,7 @@ async function executeScalp(season, year, actualSeason, dateNowSus) {
     }, { merge: true })
 
     // await promise.all(prepareAnime)
-    batch.commit()
+    return await batch.commit()
 }
 
 
@@ -550,3 +550,35 @@ exports.userCreated = functions.firestore
             favAnimes: []
         })
     })
+
+//CRON FUNCTIONS
+exports.scheduledFunctionCrontab = functions.pubsub.schedule('30 0,10,12,13,15,17,21 * * *')
+    .timeZone('America/Caracas') // Users can choose timezone - default is America/Los_Angeles
+    .onRun(async (context) => {
+        console.log("---------------------");
+        console.log("Ejecutando");
+        var options = {
+          method: 'POST',
+          //https://us-central1-moshianimeapp.cloudfunctions.net/
+          //http://localhost:5002/moshianimeapp/us-central1/api/getSetSeasonAnimes
+          uri: 'https://us-central1-moshianimeapp.cloudfunctions.net/api/getSetSeasonAnimes',
+          body: {
+            season: 'fall',
+            year: 2022,
+            actualSeason: true,
+            dateNowSus: null
+          },
+          json: true // Automatically stringifies the body to JSON
+        };
+        console.log('haciendo llamada')
+        await rp(options)
+          .then(function (parsedBody) {
+            console.log('ok')
+          })
+          .catch(function (err) {
+            console.log('error')
+            console.log(err)
+      
+          });
+        return null;
+    });

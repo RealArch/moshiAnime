@@ -30,7 +30,7 @@
       "port": 9099
     },
     "functions": {
-      "port": 5001
+      "port": 5002
     },
     "firestore": {
       "port": 8080

@@ -5,12 +5,14 @@ var rp = require('request-promise');
 const app = express();
 //cron.schedule("0 0 0,9,12,2,4,8,10 * * *", async function () {
 
-cron.schedule("0 40 0,10,12,14,15,17,21 * * *", async function () {
+cron.schedule("0 0 0,10,12,14,15,17,21 * * *", async function () {
   console.log("---------------------");
   console.log("Ejecutando");
   var options = {
     method: 'POST',
-    uri: 'http://localhost:5001/moshianimeapp/us-central1/api/getSetSeasonAnimes',
+    //https://us-central1-moshianimeapp.cloudfunctions.net/
+    //http://localhost:5002/moshianimeapp/us-central1/api/getSetSeasonAnimes
+    uri: 'https://us-central1-moshianimeapp.cloudfunctions.net/api/getSetSeasonAnimes',
     body: {
       season: 'fall',
       year: 2022,

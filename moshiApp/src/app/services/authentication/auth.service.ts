@@ -41,6 +41,7 @@ export class AuthService {
     // return this.afAuth.signInWithCredential(firebase.auth.GoogleAuthProvider.credential(res.idToken));
   }
   crearUsuarioFirestore(datos) {
+    console.log(datos)
     var ref = doc(getFirestore(), 'usuarios', datos.uid);
     return setDoc(ref, datos
     )
