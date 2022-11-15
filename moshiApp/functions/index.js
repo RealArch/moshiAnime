@@ -491,7 +491,7 @@ function formatName(title) {
     return title
 }
 
-exports.api = functions.runWith({ memory: "2GB" }).https.onRequest(app)
+exports.api = functions.runWith({ memory: "1GB",timeoutSeconds: 300 }).https.onRequest(app)
 
 exports.animeCreated = functions.firestore
     .document('animes/{animesID}')
@@ -552,7 +552,7 @@ exports.userCreated = functions.firestore
     })
 
 //CRON FUNCTIONS
-exports.scheduledFunctionCrontab = functions.pubsub.schedule('30 0,10,12,13,15,17,21 * * *')
+exports.scheduledFunctionCrontab = functions.pubsub.schedule('0 10,13,15,18 * * *')
     .timeZone('America/Caracas') // Users can choose timezone - default is America/Los_Angeles
     .onRun(async (context) => {
         console.log("---------------------");
@@ -571,14 +571,7 @@ exports.scheduledFunctionCrontab = functions.pubsub.schedule('30 0,10,12,13,15,1
           json: true // Automatically stringifies the body to JSON
         };
         console.log('haciendo llamada')
-        await rp(options)
-          .then(function (parsedBody) {
-            console.log('ok')
-          })
-          .catch(function (err) {
-            console.log('error')
-            console.log(err)
-      
-          });
+        rp(options)
+    
         return null;
     });
