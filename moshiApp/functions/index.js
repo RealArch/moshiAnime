@@ -150,7 +150,7 @@ app.post('/getSetSeasonAnimes', async (req, res) => {
     return res.json({ success: 'Solicitud enviada. Esta solicitud puede tardar hasta 60 minutos.' })
 })
 //funcitons
-async function executeScalp(season, year, actualSeason, dateNowSus) {
+async function executeScalp(season, year, isActualSeason, dateNowSus) {
     var season = season;
     var year = year;
     var page = 1;
@@ -174,6 +174,7 @@ async function executeScalp(season, year, actualSeason, dateNowSus) {
         }
     }
 
+    // seasonalAnimes.splice(0, 26)
     // seasonalAnimes.splice(1)
     const batch = db.batch();
     //Preparar data para la DB
@@ -183,6 +184,33 @@ async function executeScalp(season, year, actualSeason, dateNowSus) {
     var completedAnimes = []
     var successScraps = 0
     var metaDataErrors = []
+    //Leer los rezagados
+    //LAGGARD
+    var publicConfigs = await db.collection('statitics').doc("publicConfigs").get()
+    var actualSeason = publicConfigs.data().actualSeason
+    var laggardAnimes = publicConfigs.data().laggardAnimes
+    //Añadir aqui a la lista, los laggardAnimes si hay, y si estamos en la season actual
+    console.log(laggardAnimes.length)
+    if (laggardAnimes.length > 0 && actualSeason.season == season && actualSeason.year == year) {
+        try {
+            //leer de algolia los laggards
+            // const ALGOLIA_INDEX_NAME = !process.env.FUNCTIONS_EMULATOR ? 'prod_animes' : 'test_animes';
+            const ALGOLIA_INDEX_NAME = 'prod_animes';
+
+            const index = client.initIndex(ALGOLIA_INDEX_NAME);
+            var algoliaLaggardsAnimes = await index.getObjects(laggardAnimes)
+            //Inyectar los datos al array de animes a buscar y añadimos mal_id
+            for (let i = 0; i < algoliaLaggardsAnimes.results.length; i++) {
+                algoliaLaggardsAnimes.results[i].mal_id = algoliaLaggardsAnimes.results[i].objectID
+                seasonalAnimes.push(algoliaLaggardsAnimes.results[i])
+            }
+            console.log('habían laggards en la DB')
+
+        } catch (error) {
+            console.log(error)
+        }
+
+    }
     for (anime of seasonalAnimes) {
         var animeMetadataErrors = []
         var metadataAnime
@@ -193,37 +221,6 @@ async function executeScalp(season, year, actualSeason, dateNowSus) {
         var urls = []
         var exists = false
         var lastUpdateDate = Date.now()
-        // LEER DATA DE TITULO Y SYNOPIS DE ANIME
-
-        let options = {
-            uri: `https://api.jikan.moe/v4/anime/${anime.mal_id}/episodes`,
-            json: true
-        }
-        var metaDataTries = 1
-        while (metaDataTries < 5) {
-            try {
-
-                let timeout = new Promise(async function (resolve, reject) {
-                    var time = setTimeout(function () { reject(false) }, 4000);
-                    resolve(await rp(options))
-                    clearTimeout(time)
-                });
-                var dat = await Promise.race([timeout])
-                console.log('consegui metadata')
-                // let res = await rp(options)
-                metadataAnime = dat.data
-
-                metaDataTries = 5
-                break;  // 'return' would work here as well
-            } catch (err) {
-                console.log('error obteniendo metaData episodio')
-            }
-            if (metaDataTries == 4) {
-                console.log('No pudimos obtener metadata. Saltando este paso')
-
-            }
-            metaDataTries++;
-        }
 
         //Si el anime existe en nuestra DB, lee los episodios scalpedEpisodes.
         //Inicia busqueda desde el ultimo. control = scrapped.length + 1
@@ -232,17 +229,69 @@ async function executeScalp(season, year, actualSeason, dateNowSus) {
             exists = true
             control = dbAnime.data().scrapedEpisodes.sub_esp.length + 1;
             titleFormated = dbAnime.data().titleFormated;
+            console.log(titleFormated)
             lastUpdateDate = dbAnime.data().lastUpdate;
             urls = dbAnime.data().scrapedEpisodes.sub_esp;
             //si scrapedEpisodes.sub_esp.length >= anime.episodes && ya no esta en airign, break
-            if (dbAnime.data().scrapedEpisodes.sub_esp.length >= anime.episodes && !anime.airing) {
-                console.log('Anime finalizado y Scrap completo')
-                finalizedAnimeCount += 1
-                console.log(`${finalizedAnimeCount}/${seasonalAnimes.length} animes completados`)
-                completedAnimes.push(titleFormated)
-                continue
+            if (anime.episodes != null) {
+                if ((dbAnime.data().scrapedEpisodes.sub_esp.length >= anime.episodes)) {
+                    console.log('Anime finalizado y Scrap completo')
+                    finalizedAnimeCount += 1
+                    console.log(`${finalizedAnimeCount}/${seasonalAnimes.length} animes completados`)
+                    completedAnimes.push(titleFormated)
+
+                    //Verificar si estaba en laggardAnimes para eliminarlo
+                    for (let i = 0; i < laggardAnimes.length; i++) {
+                        if (laggardAnimes[i] == anime.mal_id) {
+                            //si encontramos el anime en laggard, lo eliminamos y actualizamos
+                            laggardAnimes.splice(i, 1)
+                            batch.update(db.collection('statitics').doc('publicConfigs'), {
+                                laggardAnimes: laggardAnimes
+                            })
+                            break
+                        }
+
+                    }
+                    continue
+                }
             }
+
         }
+        // LEER DATA DE TITULO Y SYNOPIS DE ANIME
+
+
+        let options = {
+            uri: `https://api.jikan.moe/v4/anime/${anime.mal_id}/episodes`,
+            json: true
+        }
+        var metaDataTries = 1
+        while (metaDataTries < 5) {
+            try {
+                let timeout = new Promise(async function (resolve, reject) {
+                    try {
+                        var time = setTimeout(function () { reject(false) }, 4000);
+                        resolve(await rp(options))
+                        clearTimeout(time)
+                    } catch (error) {
+                    }
+                });
+                var dat = await Promise.race([timeout])
+                console.log('consegui metadata')
+                // let res = await rp(options)
+                metadataAnime = dat.data
+                //PENDIENTEm Implementar paginas para animes con mas de 100 epis.
+                metaDataTries = 5
+                break;  // 'return' would work here as well
+            } catch (err) {
+                console.log('error obteniendo metaData episodio')
+            }
+            if (metaDataTries == 4) {
+                console.log('No pudimos obtener metadata. Saltando este paso')
+            }
+            metaDataTries++;
+        }
+
+
 
         var next = true
         while (next) {
@@ -326,10 +375,10 @@ async function executeScalp(season, year, actualSeason, dateNowSus) {
                 animeMetadataErrors.push(control)
             }
 
-            console.log('-------INFO METADATA EPISODIO----------')
-            console.log(title)
-            console.log(synopsis)
-            console.log(duration)
+            // console.log('-------INFO METADATA EPISODIO----------')
+            // console.log(title)
+            // console.log(synopsis)
+            // console.log(duration)
             // while (metaDataTries < 5) {
             //     /*PENDIENTE. 
             //     codigo defectuoso
@@ -390,9 +439,14 @@ async function executeScalp(season, year, actualSeason, dateNowSus) {
                 episodes: animeMetadataErrors
             })
         }
-
+        console.log(anime.mal_id)
+        console.log(isActualSeason)
         //Si la temporada no es la actual, usar fecha que trae el sistema
-        if (actualSeason == 'false') {
+        if (isActualSeason == 'false') {
+            console.log('----------------------------')
+            console.log('usando fecha sus: ' + dateNowSus)
+            console.log('----------------------------')
+
             lastUpdateDate = dateNowSus
         }
 
@@ -409,12 +463,12 @@ async function executeScalp(season, year, actualSeason, dateNowSus) {
             }, { merge: true })
         } else {
             //Preparar categorias
-            console.log('preparando cats')
+            // console.log('preparando cats')
             var categories = []
             for (const genre of anime.genres) {
                 categories.push(genre.mal_id)
             }
-            console.log(categories)
+            // console.log(categories)
             batch.set(db.collection('animes').doc(anime.mal_id.toString()), {
                 score: anime.score || null,
                 rank: anime.rank || null,
@@ -446,6 +500,41 @@ async function executeScalp(season, year, actualSeason, dateNowSus) {
                 titleFormated: titleFormated
             })
         }
+        // console.log('---------------------------')
+        // console.log(anime.mal_id)
+        // console.log(urls.length)
+        // console.log(anime.episodes)
+        // console.log(actualSeason.season)
+        // console.log(season)
+        // console.log(actualSeason.year)
+        // console.log(year)
+        // console.log('---------------------------')
+        //Si no se ha completado y no es la season actual ES UN LAGGARD
+        if ((urls.length < anime.episodes || anime.episodes == null) && (actualSeason.season != season || actualSeason.year != year)) {
+            //verificar si no existe en la db 
+            var existsLaggard = false
+            for (let i = 0; i < laggardAnimes.length; i++) {
+                //Si existe, salimons como si nada
+                if (laggardAnimes == anime.mal_id) {
+                    existsLaggard = true
+                    break
+                }
+            }
+            //Si no existe, añadimos a la db, si no ignoramos
+            if (!existsLaggard) {
+                //añadir solo si esta en airing y scalpEpisodes > 0
+                if (anime.airing && urls.length > 0) {
+                    console.log('consegui un laggard')
+                    console.log('y no estaba en la DB pero si en airing')
+                    batch.update(db.collection('statitics').doc('publicConfigs'), {
+                        laggardAnimes: admin.firestore.FieldValue.arrayUnion(anime.mal_id.toString())
+                    })
+                }
+
+            }
+        }
+
+
         finalizedAnimeCount += 1
         console.log(`${finalizedAnimeCount}/${seasonalAnimes.length} animes completados`)
     };
@@ -461,7 +550,13 @@ async function executeScalp(season, year, actualSeason, dateNowSus) {
         completedAnimes: completedAnimes,
         metaDataErrors: metaDataErrors
     }, { merge: true })
-
+    //PENDIENTE elminar arrays antiguos del log, permitir solamente 20
+    var logs = await db.collection('statitics').doc('logs').get()
+    var getSetSeasonAnimes = logs.data().getSetSeasonAnimes
+    getSetSeasonAnimes.splice(0, getSetSeasonAnimes.length - 19)
+    batch.update(db.collection('statitics').doc('logs'), {
+        getSetSeasonAnimes: getSetSeasonAnimes
+    })
     //Enviar los errores a la DB para revision
     batch.set(db.collection('statitics').doc('logs'), {
         getSetSeasonAnimes: admin.firestore.FieldValue.arrayUnion({
@@ -491,7 +586,7 @@ function formatName(title) {
     return title
 }
 
-exports.api = functions.runWith({ memory: "1GB",timeoutSeconds: 300 }).https.onRequest(app)
+exports.api = functions.runWith({ memory: "1GB", timeoutSeconds: 300 }).https.onRequest(app)
 
 exports.animeCreated = functions.firestore
     .document('animes/{animesID}')
@@ -550,6 +645,22 @@ exports.userCreated = functions.firestore
             favAnimes: []
         })
     })
+//Seasons
+exports.seasonCreated = functions.firestore
+    .document('seasons/{seasonId}')
+    .onCreate(async (snap, context) => {
+        //Obtener año y season del id
+        var splitted = snap.id.split('-')
+        var data = {
+            year: splitted[0],
+            season: parseInt(splitted[1])
+        }
+
+        await db.collection('statitics').doc('publicConfigs').update({
+            addedSeasons: admin.firestore.FieldValue.arrayUnion(data)
+        })
+        return
+    })
 
 //CRON FUNCTIONS
 exports.scheduledFunctionCrontab = functions.pubsub.schedule('0 10,13,15,18 * * *')
@@ -558,20 +669,20 @@ exports.scheduledFunctionCrontab = functions.pubsub.schedule('0 10,13,15,18 * * 
         console.log("---------------------");
         console.log("Ejecutando");
         var options = {
-          method: 'POST',
-          //https://us-central1-moshianimeapp.cloudfunctions.net/
-          //http://localhost:5002/moshianimeapp/us-central1/api/getSetSeasonAnimes
-          uri: 'https://us-central1-moshianimeapp.cloudfunctions.net/api/getSetSeasonAnimes',
-          body: {
-            season: 'fall',
-            year: 2022,
-            actualSeason: true,
-            dateNowSus: null
-          },
-          json: true // Automatically stringifies the body to JSON
+            method: 'POST',
+            //https://us-central1-moshianimeapp.cloudfunctions.net/
+            //http://localhost:5002/moshianimeapp/us-central1/api/getSetSeasonAnimes
+            uri: 'https://us-central1-moshianimeapp.cloudfunctions.net/api/getSetSeasonAnimes',
+            body: {
+                season: 'fall',
+                year: 2022,
+                actualSeason: true,
+                dateNowSus: null
+            },
+            json: true // Automatically stringifies the body to JSON
         };
         console.log('haciendo llamada')
         rp(options)
-    
+
         return null;
     });

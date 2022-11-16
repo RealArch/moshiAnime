@@ -24,14 +24,14 @@ export class SeasonsPage implements OnInit {
   ngOnInit() {
     this.loading = true
     this.publicConfigs = this.api.publicConfigs
-    this.year = this.getYearSeasonFromId(this.publicConfigs.actualSeason).year
-    this.season = this.getYearSeasonFromId(this.publicConfigs.actualSeason).season
+    this.year = this.publicConfigs.actualSeason.year
+    this.season = this.publicConfigs.actualSeason.season
     this.loadData(this.year, this.season, null)
 
   }
   loadData(year, season, ev) {
     this.loading = true
-    this.year = year 
+    this.year = year
     this.season = this.translateSeason(season)
     this.animes = []
     console.log(year, season)
@@ -43,11 +43,11 @@ export class SeasonsPage implements OnInit {
         console.log(err)
       })
   }
-  translateSeason(season){
-    if(season=='fall') return 'Otoño'
-    if(season=='summer') return 'Verano'
-    if(season=='winter') return 'Invierno'
-    if(season=='spring') return 'Primavera'
+  translateSeason(season) {
+    if (season == 'fall') return 'Otoño'
+    if (season == 'summer') return 'Verano'
+    if (season == 'winter') return 'Invierno'
+    if (season == 'spring') return 'Primavera'
 
   }
   getYearSeasonFromId(seasonId) {
@@ -62,10 +62,10 @@ export class SeasonsPage implements OnInit {
   formatDates(addedSeasons) {
     var options = []
     for (const season of addedSeasons) {
-      var yearSeason = this.getYearSeasonFromId(season)
+
       options.push({
-        text: yearSeason.year +' - '+ this.translateSeason(yearSeason.season),
-        value: season
+        text: season.year + ' - ' + this.translateSeason(season.season),
+        value: season.year + ' - ' + season.season
       })
     }
     return options
