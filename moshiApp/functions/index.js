@@ -95,7 +95,7 @@ app.post('/getAnimeVideo', async (req, res) => {
         var animeId = req.body.animeId
         var episode = req.body.episode
         var anime = await db.collection('animes').doc(animeId).get()
-        var formatedTitle = formatName(anime.data().title)
+        var formatedTitle = formatName(anime.data().titleFormated)
         const browser = await puppeteer.launch(
             {
                 headless: true,
@@ -133,6 +133,10 @@ app.post('/getAnimeVideo', async (req, res) => {
         var iframes = page.mainFrame().childFrames()
         data = await iframes[0].$$eval('video', pElements => pElements.map(el => el.getAttribute('src')))
         await browser.close();
+        if (data[0] == undefined) {
+            return res.status(500).json({ msg: 'error al leer video', error: error })
+
+        }
         return res.json({ url: data[0] })
     } catch (error) {
         console.log(error)

@@ -4,7 +4,8 @@ import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/authentication/auth.service';
 import { InAppBrowser } from '@awesome-cordova-plugins/in-app-browser/ngx';
 
-import { ToastController } from '@ionic/angular';
+import { ModalController, ToastController } from '@ionic/angular';
+import { UpdatePage } from './update/update.page';
 
 
 @Component({
@@ -19,7 +20,8 @@ export class AjustesPage implements OnInit {
     private router: Router,
     private api: ApiService,
     private iab: InAppBrowser,
-    private toastController:ToastController
+    private toastController:ToastController,
+    private modalController: ModalController
   ) { }
 
   ionViewWillEnter(){
@@ -33,6 +35,15 @@ export class AjustesPage implements OnInit {
       .then(() => {
         this.router.navigate(['login'])
       })
+  }
+  async updateModal() {
+    const modal = await this.modalController.create({
+    component: UpdatePage,
+    componentProps: { value: 123 }
+    });
+  
+    await modal.present();
+  
   }
   goToMal() {
     var code_challenge

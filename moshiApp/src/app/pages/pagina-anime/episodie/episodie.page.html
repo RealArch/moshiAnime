@@ -1,6 +1,6 @@
 <ion-header>
   <ion-toolbar color="dark">
-    <ion-title>Episode</ion-title>
+    <ion-title>{{titleAnime }}</ion-title>
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/pagina-anime/{{animeId}}"></ion-back-button>
       <!-- <ion-back-button defaultHref="/explora"></ion-back-button> -->
@@ -8,7 +8,7 @@
   </ion-toolbar>
 </ion-header>
 <ion-content color="medium">
-  
+
 
   <!-- <Button is="google-cast-button">Cast</Button> -->
 
@@ -43,16 +43,27 @@
       </video>
     </vg-player>
 
-    <div *ngIf="back" style="width: 50%; height: 100%; position: absolute; left: 0px; pointer-events: none">
-      <ion-icon name="play-back"></ion-icon>
+    <div *ngIf="back" class="icon-seek"
+      style="width: 50%; height: 100%; position: absolute; left: 0px; pointer-events: none">
+      <div class="text-center">
+        <ion-icon size="large" name="play-back"></ion-icon>
+        <br>
+        10 Segundos
+      </div>
     </div>
-    <div *ngIf="forward" style=" width: 50%; height: 100%; position: absolute; right: 0px; pointer-events: none">
-      <ion-icon name="play-forward"></ion-icon>
+    <div *ngIf="forward" class="icon-seek"
+      style=" width: 50%; height: 100%; position: absolute; right: 0px; pointer-events: none">
+      <div class="text-center">
+        <ion-icon size="large" name="play-forward"></ion-icon>
+        <br>
+        10 Segundos
+      </div>
     </div>
 
   </div>
+  
   <div class="p-2">
-    seccion en contruccion
+    E{{episodeId}} {{titleEpisode}}
   </div>
 
 

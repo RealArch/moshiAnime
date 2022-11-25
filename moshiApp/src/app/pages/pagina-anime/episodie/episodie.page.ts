@@ -41,6 +41,8 @@ export class EpisodiePage implements OnInit {
   backInterval: NodeJS.Timeout;
   playerHeight: number;
   initializeCastApi
+  titleEpisode: string;
+  titleAnime: string;
   constructor(
     private gestureCtrl: GestureController,
     private router: Router,
@@ -58,6 +60,8 @@ export class EpisodiePage implements OnInit {
     this.loadingVideo = true
     this.animeId = this.activatedRoute.snapshot.paramMap.get('id');
     this.episodeId = this.activatedRoute.snapshot.paramMap.get('episodeId')
+    this.titleEpisode = this.activatedRoute.snapshot.queryParamMap.get('titleEpisode')
+    this.titleAnime = this.activatedRoute.snapshot.queryParamMap.get('titleAnime')
     this.auth.isLogged()
       .subscribe(user => {
         this.subscriptions.push(
