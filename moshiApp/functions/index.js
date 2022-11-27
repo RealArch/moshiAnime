@@ -656,8 +656,8 @@ exports.seasonCreated = functions.firestore
         //Obtener año y season del id
         var splitted = snap.id.split('-')
         var data = {
-            year: splitted[0],
-            season: parseInt(splitted[1])
+            year: parseInt(splitted[0]),
+            season: splitted[1]
         }
 
         await db.collection('statitics').doc('publicConfigs').update({

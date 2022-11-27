@@ -230,7 +230,8 @@ export class ApiService {
       filters.push(`categories:${cat}`)
     }
     return animesIndex.search('', {
-      facetFilters: filters
+      facetFilters: filters,
+      numericFilters: `totalScraped_sub_esp > 0`,
     })
   }
   getSeasonAnimes(season, year, ev) {

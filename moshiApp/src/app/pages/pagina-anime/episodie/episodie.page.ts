@@ -158,74 +158,123 @@ export class EpisodiePage implements OnInit {
   }
 
 
-  onPlayerReady(api: VgApiService) {
-    this.apiVideogular = api;
-    //Fullscreen and rotate
+  async onPlayerReady(api: VgApiService) {
+    try {
+      console.log('ready')
+      this.apiVideogular = api;
+      //Fullscreen and rotate
 
-    api.seekTime(this.lastTime)
-    this.subscriptions.push(
-      this.apiVideogular.fsAPI.onChangeFullscreen.subscribe((ev) => {
-        if (ev) {
-          this.androidFullScreen.leanMode()
-          this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.LANDSCAPE);
-        } else {
-          this.androidFullScreen.showSystemUI()
-          this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT);
+      
+      this.subscriptions.push(
+        this.apiVideogular.fsAPI.onChangeFullscreen.subscribe((ev) => {
+          if (ev) {
+            this.androidFullScreen.leanMode()
+            this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.LANDSCAPE);
+          } else {
+            this.androidFullScreen.showSystemUI()
+            this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT);
 
-        }
-      })
-    )
-    //
-
-    //Event time change
-    this.subscriptions.push(
-
-      this.apiVideogular.getDefaultMedia().subscriptions.timeUpdate
-        .subscribe(time => {
-          this.currentTime = time.srcElement.currentTime
+          }
         })
-    )
-    //Detect canPlay
-    this.subscriptions.push(
-      this.apiVideogular.getDefaultMedia().subscriptions.loadedMetadata
-        .subscribe(data => {
-          this.duration = this.apiVideogular.duration
-          console.log(this.duration)
-        })
-    )
-    //Detect playing
-    this.subscriptions.push(
-      this.apiVideogular.getDefaultMedia().subscriptions.playing
-        .subscribe(data => {
-          this.videoStatus = 'playing'
-          console.log('playing')
-        })
-    )
-    this.subscriptions.push(
-      this.apiVideogular.getDefaultMedia().subscriptions.pause
-        .subscribe(data => {
-          this.videoStatus = 'pause'
+      )
+      //
 
-          console.log('pause')
-        })
-    )
-    this.subscriptions.push(
-      this.apiVideogular.getDefaultMedia().subscriptions.waiting
-        .subscribe(data => {
-          this.videoStatus = 'waiting'
+      //Event time change
+      this.subscriptions.push(
 
-          console.log('waiting')
+        this.apiVideogular.getDefaultMedia().subscriptions.timeUpdate
+          .subscribe(time => {
+            this.currentTime = time.srcElement.currentTime
+          })
+      )
+      //Detect canPlay
+      this.subscriptions.push(
+        this.apiVideogular.getDefaultMedia().subscriptions.loadedMetadata
+          .subscribe(data => {
+            this.duration = this.apiVideogular.duration
+          })
+      )
+      //Detect playing
+      this.subscriptions.push(
+
+        this.apiVideogular.getDefaultMedia().subscriptions.playing
+          .subscribe(data => {
+            this.videoStatus = 'playing'
+            console.log('playing')
+          }, err => {
+            console.log(err)
+            console.log('error play')
+          })
+      )
+      this.subscriptions.push(
+        this.apiVideogular.getDefaultMedia().subscriptions.pause
+          .subscribe(data => {
+            this.videoStatus = 'pause'
+
+            console.log('pause')
+          })
+      )
+      this.subscriptions.push(
+        this.apiVideogular.getDefaultMedia().subscriptions.waiting
+          .subscribe(data => {
+            this.videoStatus = 'waiting'
+
+            console.log('waiting')
+          })
+      )
+      this.subscriptions.push(
+        this.apiVideogular.getDefaultMedia().subscriptions.loadedData
+          .subscribe(data => {
+            // this.videoStatus = 'waiting'
+            api.seekTime(this.lastTime)
+            console.log('laoded data')
+          })
+      )
+      console.log('entre a playerReady')
+      this.subscriptions.push(
+        this.api.isLoggedIn().subscribe(user => {
+          this.userUid = user.uid
+          this.interval = setInterval(() => { this.requestSaveTime(this.videoStatus) }, this.updateTime)
+        }, err => {
+          console.log('no se esta guardando en la db el tiempo')
         })
-    )
-    console.log('entre a playerReady')
-    this.subscriptions.push(
-      this.api.isLoggedIn().subscribe(user => {
-        this.userUid = user.uid
-        this.interval = setInterval(() => { this.requestSaveTime(this.videoStatus) }, this.updateTime)
-      }, err => {
-        console.log('no se esta guardando en la db el tiempo')
-      })
-    )
+      )
+      //ONVGERROR
+      this.subscriptions.push(
+        this.apiVideogular.getDefaultMedia().subscriptions.error
+          .subscribe(data => {
+            this.videoStatus = 'error'
+
+            console.log('error')
+            //leer nuevamente la url de la db
+            this.api.getAnimeVideo(this.animeId, this.episodeId)
+              .subscribe(data => {
+                var lastTime = this.apiVideogular.currentTime
+                //Actualizar la url del video
+                var video = document.getElementById('singleVideo');
+                video.setAttribute('src', data['url'])
+                this.apiVideogular.pause()           
+
+              })
+
+            //Adelantar hasta el ultimo Time
+            ////this.apiVideogular.currentTime
+          })
+      )
+
+    } catch (error) {
+      console.log('error 1')
+      console.log(error)
+    }
+
+  }
+  test() {
+   
+    // console.log('aja')
+
+
+
+    // this.apiVideogular.play()
   }
   ngOnDestroy() {
     console.log('sali')
