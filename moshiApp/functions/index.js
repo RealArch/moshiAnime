@@ -678,8 +678,8 @@ exports.scheduledFunctionCrontab = functions.pubsub.schedule('0 10,13,15,18 * * 
             //http://localhost:5002/moshianimeapp/us-central1/api/getSetSeasonAnimes
             uri: 'https://us-central1-moshianimeapp.cloudfunctions.net/api/getSetSeasonAnimes',
             body: {
-                season: 'fall',
-                year: 2022,
+                season: 'winter',
+                year: 2023,
                 actualSeason: true,
                 dateNowSus: null
             },

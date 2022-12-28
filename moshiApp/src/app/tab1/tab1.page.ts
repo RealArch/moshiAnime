@@ -45,7 +45,7 @@ export class Tab1Page {
   loadData(ev) {
     //romance  22, comedia 4
     combineLatest([
-      this.api.getSeasonAnimes('fall', 2022, ev),
+      this.api.getSeasonAnimes('winter', 2023, ev),
       this.api.getAnimesByCat([22, 4],ev)
     ]).subscribe(([season, genresRomantic]) => {//tv,upcoming,airing
       this.season = season.hits
