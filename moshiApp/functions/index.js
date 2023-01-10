@@ -150,7 +150,8 @@ app.post('/getSetSeasonAnimes', async (req, res) => {
     var year = req.body.year;
     var actualSeason = req.body.actualSeason
     var dateNowSus = req.body.dateNowSus
-    await executeScalp(season, year, actualSeason, dateNowSus)
+    //si es local quitar el await
+    executeScalp(season, year, actualSeason, dateNowSus)
     return res.json({ success: 'Solicitud enviada. Esta solicitud puede tardar hasta 60 minutos.' })
 })
 //funcitons
@@ -179,7 +180,7 @@ async function executeScalp(season, year, isActualSeason, dateNowSus) {
     }
 
     // seasonalAnimes.splice(0, 26)
-    // seasonalAnimes.splice(1)
+    // seasonalAnimes.splice(20)
     const batch = db.batch();
     //Preparar data para la DB
     var errors = []
@@ -433,7 +434,11 @@ async function executeScalp(season, year, isActualSeason, dateNowSus) {
 
         if (urls.length == 0) {
             //Si scalpedEpisodes == 0 y urls.length == 0
-            emptyAnimes.push(titleFormated)
+            emptyAnimes.push({
+                name: titleFormated,
+                id: anime.mal_id
+
+            })
         }
         //si tiene animeMetadataErrors, añadirlo a metadataErrors
         if (animeMetadataErrors.length > 0) {
@@ -590,7 +595,7 @@ function formatName(title) {
     return title
 }
 
-exports.api = functions.runWith({ memory: "1GB", timeoutSeconds: 300 }).https.onRequest(app)
+exports.api = functions.runWith({ memory: "1GB", timeoutSeconds: 540 }).https.onRequest(app)
 
 exports.animeCreated = functions.firestore
     .document('animes/{animesID}')
