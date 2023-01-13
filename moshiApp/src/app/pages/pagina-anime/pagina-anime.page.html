@@ -19,22 +19,31 @@
   <ion-grid *ngIf="!loading">
 
     <ion-row>
-      <ion-col size="12">
-      </ion-col>
-      <ion-col size="auto">
-        <ion-card class="imgAnimeTop m-0" [ngStyle]="{'background-image': 'url('+ animeData.images.jpg.image_url +')'}">
+
+      <ion-col size="4">
+        <ion-card class="imgAnimeTop m-0 imf-fluid w-100" [ngStyle]="{'background-image': 'url('+ animeData.images.jpg.image_url +')'}">
 
         </ion-card>
       </ion-col>
-      <ion-col>
-        <p style="line-height: normal;">
+      <ion-col size="8">
+        <p style="line-height: normal;" class="mb-0">
           <ion-text class="tituloAnime">
             {{animeData.title}}
-          </ion-text><br>
+          </ion-text><br>    
+        </p>
+   
+        
+        <p class="mb-0">
           <ion-text class="tituloAnimeJp">
             {{animeData.title_japanese}}
           </ion-text>
         </p>
+
+
+          <div class="catChip" *ngFor="let cat of animeData.categories">
+            {{cat}}
+          </div>
+
       </ion-col>
 
     </ion-row>
@@ -46,6 +55,7 @@
         <app-video-item [id]="i+1" [episodeData]="ep" [animeData]="animeData" [viewedPercentage]="ep.viewedPercentage">
         </app-video-item>
       </ion-col>
+      
     </ion-row>
     <ion-row>
     </ion-row>

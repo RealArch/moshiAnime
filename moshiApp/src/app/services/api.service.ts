@@ -7,6 +7,8 @@ import algoliasearch from "algoliasearch"
 import { promise } from 'protractor';
 const client = algoliasearch(environment.algolia.appId, environment.algolia.searchKey)
 const animesIndex = client.initIndex(environment.algolia.indexes.animes);
+const categoriesIndex = client.initIndex(environment.algolia.indexes.categories);
+
 
 @Injectable({
   providedIn: 'root'
@@ -94,12 +96,12 @@ export class ApiService {
   }
   //CONFIGS
   async initPublicConfigs() {
-     return new Promise((resolve, reject) => { 
-        this.getPublicConfigs()
-          .subscribe(publicConfigs => {
-            this.publicConfigs = publicConfigs
-            resolve(true)
-          }) 
+    return new Promise((resolve, reject) => {
+      this.getPublicConfigs()
+        .subscribe(publicConfigs => {
+          this.publicConfigs = publicConfigs
+          resolve(true)
+        })
     });
 
   }
@@ -221,6 +223,12 @@ export class ApiService {
     }
     return this.http.post(`${environment.api}api/getAnimeVideo`, data)
   }
+  getCategoriesNames(catArr) {
+    return categoriesIndex.getObjects(catArr)
+  }
+  getAllCategoriesNames() {
+    return categoriesIndex.search('')
+  }
   getAnimesByCat(cats: any[], ev) {
     if (ev != null) {
       client.clearCache()
@@ -232,6 +240,8 @@ export class ApiService {
     return animesIndex.search('', {
       facetFilters: filters,
       numericFilters: `totalScraped_sub_esp > 0`,
+      hitsPerPage: 20,
+
     })
   }
   getSeasonAnimes(season, year, ev) {
@@ -241,6 +251,17 @@ export class ApiService {
     return animesIndex.search('', {
       numericFilters: `totalScraped_sub_esp > 0`,
       filters: `season:${season} AND year:${year}`
+    })
+  }
+  getLatestAnimes(ev) {
+    if (ev != null) {
+      client.clearCache()
+    }
+    return animesIndex.search('', {
+      numericFilters: `totalScraped_sub_esp > 0`,
+      hitsPerPage: 20,
+
+
     })
   }
   getAnimeData(id) {
@@ -319,9 +340,12 @@ export class ApiService {
 
   }
   //JIKAN
-  search(string) {
-    //https://api.jikan.moe/v3/search/anime?q=kanojo
-    return this.http.get(`https://api.jikan.moe/v4/anime?q=${string}`)
+  search(string, page) {
+    return animesIndex.search(string, {
+      page: page,
+      hitsPerPage: 25,
+      numericFilters: `totalScraped_sub_esp > 0`,
+    })
 
   }
   getStaffByMalId(id_anime) {

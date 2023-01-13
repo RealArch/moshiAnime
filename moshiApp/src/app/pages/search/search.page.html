@@ -19,7 +19,7 @@
   <ion-grid *ngIf="!loading">
     <ion-row>
       <ion-col size="4" *ngFor="let anime of animesFinal">
-        <ion-card color="medium" class="p-0 m-0 w-100" [routerLink]="['/pagina-anime/',anime.mal_id]" >
+        <ion-card color="medium" class="p-0 m-0 w-100" [routerLink]="['/pagina-anime/',anime.objectID]" >
           <div class="img"  [ngStyle]="{'background-image': 'url('+ anime.images.jpg.image_url +')'}"></div>          
           <ion-card-content style="padding: 5px;">
             <!-- <ion-card-subtitle>{{anime.type}}</ion-card-subtitle> -->
@@ -35,6 +35,9 @@
           </ion-card-content>
         </ion-card>
       </ion-col>
+      <ion-infinite-scroll (ionInfinite)="getData($event)" *ngIf="!noMore">
+        <ion-infinite-scroll-content></ion-infinite-scroll-content>
+      </ion-infinite-scroll>
     </ion-row>
   </ion-grid>
 </ion-content>

@@ -1,6 +1,7 @@
 .imgAnimeTop{
-    height: 160px;
-    width: 100px;
+    aspect-ratio: 9/13;
+
+    width: 100%;
     background-size: cover;
     background-position:center;
    
@@ -25,6 +26,22 @@ overflow: scroll !important;
     height: 160px;
     background-size: cover;
     background-position:center;
+}
+.catChip{
+    // flex: 1;
+    background-color: var(--ion-color-primary);
+    border-radius: 15px;
+    padding-left: 10px;
+    padding-right: 10px;
+    color: var(--ion-color-dark);
+    font-size: 10px;
+    font-weight: 600;
+    width: fit-content;
+    margin-right: 5px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    display: inline-flex;
+    // margin: 0px;
 }
 .nombrePersonaje{
     font-size: 12px;

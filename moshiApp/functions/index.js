@@ -17,27 +17,24 @@ var app = express();
 app.use(cors({ origin: true }));
 
 app.get('/test', async (req, res) => {
-    try {
-        let options = {
-            uri: `https://api.jikan.moe/v4/anime/49891/episodes`,
-            json: true
-        }
-        let timeout = new Promise(async function (resolve, reject) {
-            var time = setTimeout(function () { reject(false) }, 4000);
-            resolve(await rp(options))
-            clearTimeout(time)
-        });
-        var dat = await Promise.race([timeout])
-        console.log(dat.data)
+    var statitics = await db.collection('statitics').doc('publicConfigs').get()
+    var array = statitics.data().addedSeasons
+    var moving = array.splice(array.length - 1, 1)[0]
+    array.unshift(moving)
+    console.log(array)
+    await db.collection('statitics').doc('publicConfigs').update({
+        addedSeasons: array
+    })
+    //    var cats = await db.collection('categories').get()
+    //     cats.forEach(cat => {
+    //         const ALGOLIA_INDEX_NAME = 'prod_categories';
+    //         const algoliaCat = cat.data();
+    //         algoliaCat.objectID = cat.id;
+    //         const index = client.initIndex(ALGOLIA_INDEX_NAME);
+    //         index.saveObject(algoliaCat);
 
-        console.log('todo bien')
-    } catch (error) {
-        console.log(error)
-        console.log('error')
-    }
-    return res.send('ok')
-
-
+    //     });
+    //     return res.json('ok')
 })
 app.get('/', async (req, res) => {
     //Actualizar categories
@@ -151,7 +148,7 @@ app.post('/getSetSeasonAnimes', async (req, res) => {
     var actualSeason = req.body.actualSeason
     var dateNowSus = req.body.dateNowSus
     //si es local quitar el await
-    executeScalp(season, year, actualSeason, dateNowSus)
+    await executeScalp(season, year, actualSeason, dateNowSus)
     return res.json({ success: 'Solicitud enviada. Esta solicitud puede tardar hasta 60 minutos.' })
 })
 //funcitons
@@ -665,12 +662,38 @@ exports.seasonCreated = functions.firestore
             season: splitted[1]
         }
 
+        var statitics = await db.collection('statitics').doc('publicConfigs').get()
+        var array = statitics.data().addedSeasons
+        array.unshift(data)
         await db.collection('statitics').doc('publicConfigs').update({
-            addedSeasons: admin.firestore.FieldValue.arrayUnion(data)
+            addedSeasons: array
         })
         return
     })
+//CATEGORIES
+exports.categoryCreated = functions.firestore
+    .document('categories/{categoryId}')
+    .onCreate(async (snap, context) => {
+        //Guardar en algolia
+        const ALGOLIA_INDEX_NAME = !process.env.FUNCTIONS_EMULATOR ? 'prod_categories' : 'test_categories';
+        const cat = snap.data();
+        cat.objectID = snap.id;
+        const index = client.initIndex(ALGOLIA_INDEX_NAME);
+        index.saveObject(cat);
+        return
+    })
 
+exports.categoryUpdated = functions.firestore
+    .document('categories/{categoryId}')
+    .onUpdate(async (snap, context) => {
+        //Guardar en algolia
+        const ALGOLIA_INDEX_NAME = !process.env.FUNCTIONS_EMULATOR ? 'prod_categories' : 'test_categories';
+        const cat = snap.after.data();
+        cat.objectID = snap.after.id;
+        const index = client.initIndex(ALGOLIA_INDEX_NAME);
+        index.saveObject(cat);
+        return
+    })
 //CRON FUNCTIONS
 exports.scheduledFunctionCrontab = functions.pubsub.schedule('0 10,13,15,18 * * *')
     .timeZone('America/Caracas') // Users can choose timezone - default is America/Los_Angeles

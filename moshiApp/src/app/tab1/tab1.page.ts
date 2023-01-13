@@ -35,6 +35,8 @@ export class Tab1Page {
   loading: boolean;
   season: any;
   genresRomantic;
+  latestUpdated: any;
+  genresComedy: any;
   constructor(
     private api: ApiService,
   ) {
@@ -46,12 +48,18 @@ export class Tab1Page {
     //romance  22, comedia 4
     combineLatest([
       this.api.getSeasonAnimes('winter', 2023, ev),
-      this.api.getAnimesByCat([22, 4],ev)
-    ]).subscribe(([season, genresRomantic]) => {//tv,upcoming,airing
+      this.api.getLatestAnimes(ev),
+      this.api.getAnimesByCat([22, 4], ev),
+      this.api.getAnimesByCat([4], ev),
+
+    ]).subscribe(([season, latestUpdated, genresRomantic, genresComedy]) => {//tv,upcoming,airing
       this.season = season.hits
+      //latestUpdated
+      this.latestUpdated = latestUpdated.hits
       //Romantic
       this.genresRomantic = genresRomantic.hits
-      console.log(this.genresRomantic)
+      //Comedy
+      this.genresComedy = genresComedy.hits
       if (ev != null) {
         ev.target.complete();
       }

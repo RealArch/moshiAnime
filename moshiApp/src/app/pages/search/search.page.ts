@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { IonSearchbar, ModalController, NavController } from '@ionic/angular';
+import { InfiniteScrollCustomEvent, IonSearchbar, ModalController, NavController } from '@ionic/angular';
 import { ApiService } from 'src/app/services/api.service';
 
 
@@ -15,41 +15,62 @@ export class SearchPage implements OnInit {
   animes
   loading: boolean;
   animesFinal: any;
+  searchString: any;
+  noMore: boolean;
+  page: number = 0;
 
   constructor(
-    private modal:ModalController,
-    private api:ApiService,
-    private navController:NavController,
-    ) { }
+    private modal: ModalController,
+    private api: ApiService,
+    private navController: NavController,
+  ) { }
 
   ngOnInit() {
 
   }
   ionViewDidEnter() {
-    setTimeout(()=>{
-        this.searchBar.setFocus();
+    setTimeout(() => {
+      this.searchBar.setFocus();
     }, 150);
   }
-  close(){
+  close() {
     this.navController.back()
   }
-  search(ev){
-    this.loading=true
-    this.animesFinal=[]
-    console.log(ev.detail.value)
-    this.api.search(ev.detail.value)
-    .subscribe(data=>{
-      console.log(data)
-      this.animes = data['data']
-      for (let i = 0; i < this.animes.length; i++) {
+  async search(ev) {
+    this.searchString = ev.detail.value
+    this.loading = true
+    this.animesFinal = []
+    await this.getData(null)
+    this.loading = false
+    // this.api.search(ev.detail.value, 0)
+    //   .then(data => {
+    //     console.log(data)
+    //     this.animesFinal = data.hits
+    //     this.loading = false
 
-        // console.log(this.animes[i].image_url.split('/')[5])
-        if(this.animes[i].rated!='Rx'){
-          this.animesFinal.push(this.animes[i])
-        }
+    //   }).catch(err => {
+    //     console.log(err)
+    //   })
+
+
+  }
+  async getData(ev) {
+    try {
+      var animeData = await this.api.search(this.searchString, this.page)
+      this.animesFinal.push(...animeData.hits)
+      if (ev != null) {
+        ev.target.complete();
       }
-      console.log(this.animes)
-      this.loading=false
-    })
+      if (animeData.hits.length == 0) {
+        this.noMore = true
+      }
+      this.page += 1
+
+    } catch (error) {
+
+    }
+
+
+
   }
 }

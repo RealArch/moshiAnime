@@ -18,6 +18,8 @@ export const environment = {
       searchKey: 'a47631b9a0d469934ef61dd22ebaa982',
       indexes: {
         animes: `${env}_animes`,
+        categories: `${env}_categories`,
+
       }
     }
 

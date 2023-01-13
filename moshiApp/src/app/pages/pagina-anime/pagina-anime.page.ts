@@ -65,6 +65,7 @@ export class PaginaAnimePage implements OnInit {
   loadingUpdateFav: boolean;
   isFav = false
   subscriptions: Subscription[] = [];
+  categories: any;
   constructor(
     private androidFullScreen: AndroidFullScreen,
     private activatedRoute: ActivatedRoute,
@@ -82,22 +83,23 @@ export class PaginaAnimePage implements OnInit {
   ngOnDestroy() {
     this.subscriptions.forEach(s => s.unsubscribe());
   }
-  ngOnInit() {
+  async ngOnInit() {
     //2 finalizados
     //6 plan to watch
     //1 watching 
     this.loading = true
     var user = getAuth().currentUser
-    console.log(user)
     this.malId = this.activatedRoute.snapshot.paramMap.get('id')
     this.queryAnimeTitle = this.activatedRoute.snapshot.queryParamMap.get('title')
-    console.log(this.queryAnimeTitle)
+    //Leer nombres de categorias
+    await this.getCatNames()
     if (user != null) {
       this.subscriptions.push(
         combineLatest([
           this.api.getAnimeData(this.malId),
           this.api.getPublicUserData(user.uid)
         ]).subscribe(([animeData, userData]) => {
+          console.log(animeData)
           this.uid = user.uid
           //animeData
           this.animeData = animeData
@@ -107,6 +109,8 @@ export class PaginaAnimePage implements OnInit {
           this.isFav = this.api.isFavLocal(this.userData.favAnimes, this.malId)
           //
           this.addTimeToEpisode(this.malId, this.userData.viewedAnimes, this.animeData)
+          //Sustituir nombre cat
+          this.susCatName(this.animeData.categories)
           this.loading = false
         })
       )
@@ -120,14 +124,26 @@ export class PaginaAnimePage implements OnInit {
     }
 
   }
+  async getCatNames(){
+    this.categories = (await this.api.getAllCategoriesNames()).hits
+  }
+  susCatName(catArr){
+    console.log(this.categories)
+    for (let i = 0; i < catArr.length; i++) {
+      for (const globalCat of this.categories) {
+        if(globalCat.objectID == catArr[i]){
+          catArr[i] = globalCat.name
+        }
+      }
+    }
 
+  }
   toggleFav() {
     if (this.loadingUpdateFav)
       return
     this.loadingUpdateFav = true
     this.api.toggleFav(this.malId)
       .then(() => {
-        console.log('volvi')
       }).catch(err => {
         console.log(err)
         this.apiPopups.toast('danger', 'Ocurrió un problema a modificar los favoritos.')
@@ -145,7 +161,6 @@ export class PaginaAnimePage implements OnInit {
   }
   getTimeFromId(animeId, episodeId, viewedAnimes) {
     //  console.log(episodeId)
-    console.log(viewedAnimes)
     //  console.log(animeId)
     for (let i = 0; i < viewedAnimes.length; i++) {
       //leer todos lo animes vistos
@@ -153,14 +168,10 @@ export class PaginaAnimePage implements OnInit {
 
 
 
-      console.log(viewedAnimes[i].animeId)
-      console.log(animeId)
       if (viewedAnimes[i].animeId == animeId) {
-        console.log("encontramos el anime")
         //Luego buscar el id del espisodio
         for (let j = 0; j < viewedAnimes[i].episodes.length; j++) {
           if (viewedAnimes[i].episodes[j].episodeId == episodeId) {
-            console.log("encontramos el episodio")
             //calcular porcentaje entre 0 y 1
             var percentage = viewedAnimes[i].episodes[j].lastTime * 100 / viewedAnimes[i].episodes[j].duration
             return percentage / 100
@@ -181,7 +192,6 @@ export class PaginaAnimePage implements OnInit {
     }
   }
   cargarMiAnime(userInfo) {
-    console.log(userInfo)
     for (let i = 0; i < userInfo.listaAnime.length; i++) {
       if (userInfo.listaAnime[i].mal_id == this.activatedRoute.snapshot.paramMap.get('id')) {
         this.miInfoAnime = userInfo.listaAnime[i]
@@ -231,7 +241,6 @@ export class PaginaAnimePage implements OnInit {
         text: 'Cancelar',
         role: 'Cancel',
         handler: () => {
-          console.log('Delete clicked');
         }
       }]
     });
@@ -255,7 +264,6 @@ export class PaginaAnimePage implements OnInit {
           watching_status: this.miInfoAnime.watching_status,
           watched_episodes: data.data['episodio']
         }
-        console.log(data.data['episodio'])
       })
     return await modal.present();
   }
@@ -328,8 +336,7 @@ export class PaginaAnimePage implements OnInit {
     // }
   }
   addDeleteEpisode(cantidad) {
-    console.log(this.miInfoAnime)
-    console.log(this.snapshotMiInfoAnime)
+
     this.miInfoAnime = {
       mal_id: this.anime.mal_id,
       title: this.anime.title,
@@ -377,7 +384,6 @@ export class PaginaAnimePage implements OnInit {
           text: 'Ok',
           role: 'cancel',
           handler: () => {
-            console.log('Cancel clicked');
           }
         }
       ]
