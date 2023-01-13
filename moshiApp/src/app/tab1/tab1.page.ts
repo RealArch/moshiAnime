@@ -3,6 +3,10 @@ import { ApiService } from '../services/api.service';
 import { combineLatest } from 'rxjs';
 import { Lazy, SwiperOptions } from 'swiper';
 import SwiperCore, { Virtual, FreeMode } from 'swiper';
+
+import { AdMobPlus, BannerAd, InterstitialAd } from '@admob-plus/capacitor'
+
+
 SwiperCore.use([FreeMode, Lazy,]);
 @Component({
   selector: 'app-tab1',
@@ -42,6 +46,22 @@ export class Tab1Page {
   ) {
     this.loading = true
     this.loadData(null)
+    this.addMod()
+
+  }
+  addMod(){
+
+    // (async () => {
+    //   const banner = new BannerAd({
+    //     adUnitId: 'ca-app-pub-3940256099942544/6300978111', 
+    //   })
+    //   await banner.show()
+    
+    //   AdMobPlus.addListener('banner.impression', async () => {
+    //     // await banner.hide()
+    //   })
+    // })()
+
 
   }
   loadData(ev) {

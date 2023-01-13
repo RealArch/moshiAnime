@@ -9,3 +9,18 @@
     justify-content: center;
     align-items: center;
 }
+
+.customButton {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50px;
+    width: 50px;
+    cursor: pointer;
+    color: #fff;
+    line-height: 50px;
+}

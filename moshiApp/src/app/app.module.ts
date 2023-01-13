@@ -25,10 +25,8 @@ import { provideAuth, getAuth, connectAuthEmulator } from '@angular/fire/auth';
 import { provideFirestore, getFirestore, connectFirestoreEmulator, enableIndexedDbPersistence } from '@angular/fire/firestore';
 import { SwiperModule } from 'swiper/angular';
 
-// import { VgCoreModule } from '@videogular/ngx-videogular/core';
-// import { VgControlsModule } from '@videogular/ngx-videogular/controls';
-// import { VgOverlayPlayModule } from '@videogular/ngx-videogular/overlay-play';
-// import { VgBufferingModule } from '@videogular/ngx-videogular/buffering';
+// import { Admob } from '@awesome-cordova-plugins/admob/ngx';
+
 
 @NgModule({
   declarations: [AppComponent],
@@ -73,7 +71,8 @@ import { SwiperModule } from 'swiper/angular';
     HTTP,
     InAppBrowser,
     VideoPlayer, 
-    ScreenOrientation
+    ScreenOrientation, 
+    // Admob
   ],
   bootstrap: [AppComponent],
 })

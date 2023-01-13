@@ -16,7 +16,7 @@ import { createGesture, Gesture, GestureController } from '@ionic/angular';
 })
 export class EpisodiePage implements OnInit {
   animeId: string;
-  episodeId: string
+  episodeId: number
   loadingVideo: boolean;
   video: any;
   apiVideogular: VgApiService;
@@ -43,6 +43,9 @@ export class EpisodiePage implements OnInit {
   initializeCastApi
   titleEpisode: string;
   titleAnime: string;
+  animeData: import("@angular/fire/firestore").DocumentData;
+  user: import("@angular/fire/auth").User;
+  loadingData: boolean;
   constructor(
     private gestureCtrl: GestureController,
     private router: Router,
@@ -56,49 +59,64 @@ export class EpisodiePage implements OnInit {
   }
 
   async ngOnInit() {
-    this.currentTime = this.lastTime
+    this.loadingData = true
     this.loadingVideo = true
+    this.currentTime = this.lastTime
     this.animeId = this.activatedRoute.snapshot.paramMap.get('id');
-    this.episodeId = this.activatedRoute.snapshot.paramMap.get('episodeId')
-    this.titleEpisode = this.activatedRoute.snapshot.queryParamMap.get('titleEpisode')
+    this.episodeId = parseInt(this.activatedRoute.snapshot.paramMap.get('episodeId'))
     this.titleAnime = this.activatedRoute.snapshot.queryParamMap.get('titleAnime')
     this.auth.isLogged()
       .subscribe(user => {
-        this.subscriptions.push(
-          combineLatest([
-            this.api.getAnimeVideo(this.animeId, this.episodeId),
-            this.api.getPublicUserData(user.uid)
+        this.user = user
+        this.loadEpisode(this.episodeId)
 
-          ]).subscribe(async ([animeVideo, publicUserData]) => {
-            this.video = animeVideo['url']
-            //publicUserData
-            this.publicUserData = publicUserData
-            //Get lastTime in seconds
-            this.lastTime = this.api.searchTimeAnimeEpisode(this.episodeId, this.animeId, this.publicUserData.viewedAnimes)
-            this.loadingVideo = false
-
-            setTimeout(() => {
-              this.player = document.getElementById('player')
-              const gesture = this.gestureCtrl.create({
-                gestureName: 'doubleTap',
-                el: this.player,
-                threshold: 0,
-                onStart: (t) => { this.onStart(t); }
-              });
-              let resizeObserver = new ResizeObserver((e) => {
-                this.playerWidth = e[0].contentRect.width
-                this.playerHeight = e[0].contentRect.height
-              });
-              resizeObserver.observe(this.player);
-              gesture.enable();
-            }, 100)
-
-          })
-        )
       })
     // this.video = 'assets/video.mp4'
     // this.loadingVideo = false
   }
+  loadEpisode(episodeId ) {
+    this.clean()
+    this.episodeId = episodeId
+    this.loadingData = true
+    this.loadingVideo = true
+    this.subscriptions.push(
+      combineLatest([
+        this.api.getAnimeVideo(this.animeId, episodeId),
+        this.api.getPublicUserData(this.user.uid),
+        this.api.getAnimeData(this.animeId)
+      ]).subscribe(async ([animeVideo, publicUserData, animeData]) => {
+        this.video = animeVideo['url']
+        //publicUserData
+        this.publicUserData = publicUserData
+        //ANimeData
+        this.animeData = animeData
+        this.titleEpisode = this.animeData.scrapedEpisodes.sub_esp[episodeId-1].title
+
+        console.log(animeData)
+        //Get lastTime in seconds
+        this.lastTime = this.api.searchTimeAnimeEpisode(episodeId, this.animeId, this.publicUserData.viewedAnimes)
+        this.loadingVideo = false
+        this.loadingData = false
+        setTimeout(() => {
+          this.player = document.getElementById('player')
+          const gesture = this.gestureCtrl.create({
+            gestureName: 'doubleTap',
+            el: this.player,
+            threshold: 0,
+            onStart: (t) => { this.onStart(t); }
+          });
+          let resizeObserver = new ResizeObserver((e) => {
+            this.playerWidth = e[0].contentRect.width
+            this.playerHeight = e[0].contentRect.height
+          });
+          resizeObserver.observe(this.player);
+          gesture.enable();
+        }, 100)
+
+      })
+    )
+  }
+
   private onStart(t) {
     const now = Date.now();
 
@@ -164,7 +182,7 @@ export class EpisodiePage implements OnInit {
       this.apiVideogular = api;
       //Fullscreen and rotate
 
-      
+
       this.subscriptions.push(
         this.apiVideogular.fsAPI.onChangeFullscreen.subscribe((ev) => {
           if (ev) {
@@ -245,20 +263,32 @@ export class EpisodiePage implements OnInit {
           .subscribe(data => {
             this.videoStatus = 'error'
 
-            console.log('error')
-            //leer nuevamente la url de la db
-            this.api.getAnimeVideo(this.animeId, this.episodeId)
-              .subscribe(data => {
-                var lastTime = this.apiVideogular.currentTime
-                //Actualizar la url del video
-                var video = document.getElementById('singleVideo');
-                video.setAttribute('src', data['url'])
-                this.apiVideogular.pause()           
+            // console.log('error')
+            // //leer nuevamente la url de la db
+            // this.api.getAnimeVideo(this.animeId, this.episodeId)
+            //   .subscribe(data => {
+            //     var lastTime = this.apiVideogular.currentTime
+            //     //Actualizar la url del video
+            //     var video = document.getElementById('singleVideo');
+            //     video.setAttribute('src', data['url'])
+            //     this.apiVideogular.pause()           
 
-              })
+            //   })
 
-            //Adelantar hasta el ultimo Time
-            ////this.apiVideogular.currentTime
+            if (this.apiVideogular.canPlay) {
+              this.api.getAnimeVideo(this.animeId, this.episodeId)
+                .subscribe(data => {
+                  console.log('error 2')
+                  var lastTime = this.apiVideogular.currentTime
+                  //Actualizar la url del video
+                  var video = document.getElementById('singleVideo');
+                  video.setAttribute('src', data['url'])
+                  this.apiVideogular.pause()
+
+                })
+            }
+
+
           })
       )
 
@@ -268,23 +298,15 @@ export class EpisodiePage implements OnInit {
     }
 
   }
-  test() {
-   
-    // console.log('aja')
 
-
-
-    // this.apiVideogular.play()
-  }
   ngOnDestroy() {
-    console.log('sali')
+    this.clean()
+  }
+  clean(){
     this.subscriptions.forEach(s => s.unsubscribe());
     clearInterval(this.interval)
     //Guardar progreso del episodio si es diferente current time y prev current time
-    console.log(this.currentTime)
-    console.log(this.lastTime)
     if (this.currentTime != this.lastTime) {
-      console.log('salimos, guardamos')
       this.saveTime()
     }
   }

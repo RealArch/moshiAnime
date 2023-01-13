@@ -217,6 +217,7 @@ export class ApiService {
     });
   }
   getAnimeVideo(animeId, episode) {
+    console.log(animeId +'-'+ episode)
     var data = {
       animeId: animeId,
       episode: episode

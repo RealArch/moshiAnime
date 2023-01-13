@@ -5,8 +5,8 @@ var env = 'prod'
 export const environment = {
   useEmulators:false,
   production: false,
-  api: 'https://us-central1-moshianimeapp.cloudfunctions.net/',
-  // api: 'http://localhost:5002/moshianimeapp/us-central1/',
+  // api: 'https://us-central1-moshianimeapp.cloudfunctions.net/',
+  api: 'http://localhost:5002/moshianimeapp/us-central1/',
 
   firebase: {
     apiKey: "AIzaSyBywZj_-QG-2s2E-sU4rq6JIqGmgJ4DKvs",

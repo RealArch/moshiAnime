@@ -80,6 +80,16 @@ export class PaginaAnimePage implements OnInit {
     private apiPopups: PopupsService
     // private videoPlayer: VideoPlayer
   ) { }
+  // ngAfterViewInit() {
+  //   setTimeout(() => {
+  //     try {
+  //       (window['adsbygoogle'] = window['adsbygoogle'] || []).push({});
+  //       console.log('okok')
+  //     } catch (e) {
+  //       console.error('error');
+  //     }
+  //   }, 2000);
+  // }
   ngOnDestroy() {
     this.subscriptions.forEach(s => s.unsubscribe());
   }
