@@ -16,7 +16,16 @@
     </style>
 
 
-    <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
+    <!-- <style name="AppTheme.NoActionBarLaunch" parent="AppTheme.NoActionBar">
+        <item name="android:background">#ffffff</item>
+    </style> -->
+    <!-- <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
         <item name="android:background">@drawable/splash</item>
+    </style> -->
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash</item>
+        <item name="android:windowSplashScreenBrandingImage">@drawable/branding</item>
+        <!-- <item name="postSplashScreenTheme">@style/AppTheme</item> -->
+        <!-- <item name="windowSplashScreenBackground">@color/ic_launcher_background</item> -->
     </style>
 </resources>
